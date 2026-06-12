@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -10,127 +10,112 @@
   --bg:#0c0c10;--bg2:#13131a;--bg3:#1a1a24;--card:#161620;
   --border:rgba(255,255,255,0.07);--border-neon:rgba(0,217,126,0.28);
   --text:#eeeef5;--text2:#8888aa;--text3:#44445a;
-  --amber:#f5a623;--red:#f54269;--mist:#f7b731;--r:14px;--rs:9px;
+  --amber:#f5a623;--red:#f54269;--mist:#f7b731;
 }
-html,body{width:100%;overflow-x:hidden}
+html,body{width:100%;height:100%;overflow-x:hidden}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,217,126,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,217,126,0.025) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;z-index:0}
+
 .wrap{width:100%;max-width:960px;margin:0 auto;padding:14px 12px 40px;position:relative;z-index:1}
-
-/* HEADER */
 .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:8px}
-.logo{display:flex;align-items:center;gap:8px;min-width:0}
-.logo-ico{width:34px;height:34px;min-width:34px;border-radius:9px;background:var(--neon-dim);border:1px solid var(--border-neon);display:flex;align-items:center;justify-content:center;font-size:17px}
-.logo-name{font-size:15px;font-weight:600;letter-spacing:-.3px;white-space:nowrap}
-.logo-sub{font-size:10px;color:var(--text2);white-space:nowrap}
-.pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;border:1px solid var(--border);background:var(--bg2);font-size:11px;color:var(--text2);white-space:nowrap;flex-shrink:0}
-.dot{width:7px;height:7px;min-width:7px;border-radius:50%;background:var(--text3);transition:background .3s}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-ico{width:34px;height:34px;border-radius:9px;background:var(--neon-dim);border:1px solid var(--border-neon);display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-name{font-size:16px;font-weight:600}
+.logo-sub{font-size:10px;color:var(--text2)}
+.pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--bg2);font-size:11px;color:var(--text2)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--text3)}
 .dot.ok{background:var(--neon);box-shadow:var(--neon-glow)}
-.dot.ld{background:var(--amber);animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* LAYOUT */
 .grid{display:flex;flex-direction:column;gap:12px}
-@media(min-width:700px){.grid{flex-direction:row;align-items:start}.grid .left{flex:1;min-width:0}.grid .right{width:320px;flex-shrink:0}}
+@media(min-width:700px){
+  .grid{flex-direction:row;align-items:flex-start}
+  .left{flex:1}
+  .right{width:300px;flex-shrink:0}
+}
 
-/* CAMERA */
-.cam-wrap{border-radius:var(--r);overflow:hidden;background:#000;border:1px solid var(--border);position:relative;width:100%;aspect-ratio:4/3}
+.cam-wrap{border-radius:14px;overflow:hidden;background:#000;border:1px solid var(--border);position:relative;width:100%;aspect-ratio:4/3}
 .cam-wrap.live{border-color:var(--border-neon)}
 #vid{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
 #cvs{position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1);pointer-events:none}
-.over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg2);transition:opacity .4s}
-.over.gone{opacity:0;pointer-events:none}
+.badge{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:999px;padding:4px 12px;font-size:11px;display:flex;align-items:center;gap:5px}
+.badge.hand{border-color:var(--border-neon);color:var(--neon)}
+.over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg2)}
+.over.gone{display:none}
 .over-ico{font-size:40px;margin-bottom:8px;opacity:.25}
 .over-txt{font-size:13px;color:var(--text2)}
-.badge{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:999px;padding:4px 12px;font-size:11px;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:all .3s}
-.badge.hand{border-color:var(--border-neon);color:var(--neon)}
-.bdot{width:5px;height:5px;border-radius:50%;background:#444;display:inline-block}
-.cr{position:absolute;width:16px;height:16px;opacity:.35}
-.cr.tl{top:6px;left:6px;border-top:2px solid var(--neon);border-left:2px solid var(--neon)}
-.cr.tr{top:6px;right:6px;border-top:2px solid var(--neon);border-right:2px solid var(--neon)}
-.cr.bl{bottom:6px;left:6px;border-bottom:2px solid var(--neon);border-left:2px solid var(--neon)}
-.cr.br{bottom:6px;right:6px;border-bottom:2px solid var(--neon);border-right:2px solid var(--neon)}
 
-/* PANEL */
 .panel{display:flex;flex-direction:column;gap:10px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
 .card.lit{border-color:var(--border-neon)}
-.lbl{font-size:10px;letter-spacing:1.4px;color:var(--text3);text-transform:uppercase;margin-bottom:7px}
+.lbl{font-size:10px;letter-spacing:1.4px;color:var(--text3);text-transform:uppercase;margin-bottom:8px}
 
-/* DETECTED WORD */
-.big{font-size:clamp(26px,8vw,40px);font-weight:700;color:var(--neon);text-shadow:var(--neon-glow);min-height:42px;display:flex;align-items:center;justify-content:center;text-align:center;transition:all .12s;word-break:keep-all;line-height:1.2}
-.big.dim{color:var(--text3);text-shadow:none;font-size:clamp(18px,5vw,24px);font-weight:400}
-.sub{font-size:12px;color:var(--text2);margin-top:6px;min-height:15px;text-align:center}
-.reason-txt{font-size:11px;color:var(--mist);margin-top:4px;min-height:15px;text-align:center;opacity:.9;padding:0 4px}
+.big{font-size:clamp(26px,8vw,40px);font-weight:700;color:var(--neon);text-shadow:var(--neon-glow);text-align:center;min-height:40px;display:flex;align-items:center;justify-content:center}
+.big.dim{color:var(--text3);text-shadow:none;font-size:20px}
+.sub{font-size:12px;color:var(--text2);margin-top:6px;text-align:center}
+.reason{font-size:11px;color:var(--mist);margin-top:4px;text-align:center}
+
 .bar-row{margin-top:10px;display:flex;align-items:center;gap:8px}
-.bar-pct{font-size:11px;color:var(--text3);width:26px;text-align:right}
+.bar-pct{font-size:11px;color:var(--text3);width:30px;text-align:right}
 .bar-track{flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
-.bar-fill{height:100%;border-radius:2px;background:var(--neon);transition:width .18s ease,background .2s;width:0%}
-.hold-track{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-top:8px}
-.hold-fill{height:100%;border-radius:2px;background:var(--mist);transition:width .1s linear;width:0%}
-.hold-lbl{font-size:9px;color:var(--text3);margin-top:3px}
+.bar-fill{height:100%;background:var(--neon);border-radius:2px;transition:width .2s}
 
-/* SENTENCE */
-.sent-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.sent-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
 .sent-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .acts{display:flex;gap:6px}
-.ibtn{width:36px;height:36px;min-height:44px;min-width:44px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
-.ibtn:active{background:var(--bg3);color:var(--text)}
-.sent-txt{font-size:clamp(15px,4.5vw,18px);font-weight:600;min-height:26px;word-break:break-word;line-height:1.5}
-.sent-txt.empty{font-size:13px;color:var(--text3);font-weight:400}
-.tts-row{display:flex;gap:6px;margin-top:10px}
-.tts-btn{flex:1;padding:12px 8px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
-.tts-btn.on{border-color:var(--border-neon);color:var(--neon);background:var(--neon-dim)}
+.btn-ico{width:40px;height:40px;border-radius:8px;border:1px solid var(--border);background:0;color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.btn-ico:active{background:var(--bg3);color:var(--text)}
 
-/* START BUTTON */
-.start-btn{width:100%;padding:16px 15px;border-radius:var(--rs);border:1px solid var(--border-neon);background:var(--neon-dim);color:var(--neon);font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;min-height:50px}
-.start-btn:active{background:rgba(0,217,126,.22)}
+.sent-txt{font-size:16px;font-weight:600;word-break:break-word;min-height:24px}
+.sent-txt.empty{color:var(--text3);font-size:13px;font-weight:400}
+
+.button-group{display:flex;gap:6px;margin-top:10px}
+.button-group button{flex:1;padding:10px;border-radius:9px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:12px;cursor:pointer;transition:.15s;font-weight:600}
+.button-group button.on{border-color:var(--border-neon);color:var(--neon);background:var(--neon-dim)}
+
+.start-btn{width:100%;padding:14px;border-radius:9px;border:1px solid var(--border-neon);background:var(--neon-dim);color:var(--neon);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.start-btn:active{background:rgba(0,217,126,.2)}
 .start-btn:disabled{opacity:.4;cursor:not-allowed}
 
-/* GESTURES GRID */
-.ref-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.ref-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
 .rgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.ri{border:1px solid var(--border);border-radius:7px;padding:10px 8px;text-align:center;background:var(--bg2);cursor:pointer;transition:all .2s;position:relative;touch-action:manipulation;user-select:none;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ri:hover{border-color:var(--border-neon);background:var(--bg3)}
+.ri{border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center;background:var(--bg2);cursor:pointer;transition:.2s;min-height:70px;display:flex;flex-direction:column;justify-content:center}
 .ri:active{border-color:var(--border-neon);background:var(--bg3)}
 .ri.hi{border-color:var(--neon);background:var(--neon-dim)}
-.ri-w{font-size:12px;font-weight:600;color:var(--text)}
-.ri-d{font-size:9px;color:var(--text3);margin-top:2px;line-height:1.3}
-.ri-demo{font-size:9px;color:var(--mist);margin-top:3px;opacity:.7}
+.ri-w{font-size:13px;font-weight:600;color:var(--text)}
+.ri-d{font-size:9px;color:var(--text3);margin-top:2px}
+.ri-emoji{font-size:18px;margin-bottom:4px}
 
-.tip{font-size:11px;color:var(--text3);display:flex;gap:5px;padding:9px 11px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg2);line-height:1.5;margin-top:8px}
+.tip{font-size:11px;color:var(--text3);padding:10px;border-radius:9px;border:1px solid var(--border);background:var(--bg2);margin-top:8px;line-height:1.5}
 
-/* ERROR */
-.err-toast{display:none;position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:999;background:#1a0a0e;border:1px solid rgba(245,66,105,0.5);border-radius:10px;padding:10px 16px;font-size:13px;color:var(--red);max-width:90vw;text-align:center;word-break:break-word;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.err-toast{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:999;background:#1a0a0e;border:1px solid rgba(245,66,105,0.5);border-radius:10px;padding:12px 16px;font-size:12px;color:var(--red);max-width:80vw;text-align:center}
 .err-toast.show{display:block}
 
-/* MODAL */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center;padding:20px;pointer-events:none}
-.modal.show{display:flex;pointer-events:auto}
-.modal-content{background:var(--card);border:1px solid var(--border-neon);border-radius:var(--r);padding:20px;max-width:400px;width:100%}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-bg{background:var(--card);border:1px solid var(--border-neon);border-radius:14px;padding:20px;max-width:380px;width:100%}
 .modal-title{font-size:18px;font-weight:700;color:var(--neon);margin-bottom:12px}
-.modal-desc{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6}
-.modal-demo{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:15px;margin-bottom:16px;text-align:center;font-size:12px;color:var(--text3)}
-.modal-demo-text{font-size:14px;color:var(--text);margin-top:8px;font-weight:600}
+.modal-text{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.modal-demo{background:var(--bg2);border-radius:10px;padding:15px;margin-bottom:16px;text-align:center;font-size:12px;color:var(--text3)}
+.modal-demo-big{font-size:20px;margin-bottom:8px}
 .modal-btns{display:flex;gap:8px}
-.modal-btn{flex:1;padding:14px 12px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;touch-action:manipulation;user-select:none}
-.modal-btn.ok{border-color:var(--border-neon);background:var(--neon-dim);color:var(--neon)}
+.modal-btn{flex:1;padding:12px;border-radius:9px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
+.modal-btn:active{background:var(--bg3)}
+.modal-btn.ok{border-color:var(--border-neon);color:var(--neon);background:var(--neon-dim)}
 </style>
 </head>
 <body>
 
 <div class="err-toast" id="errToast"></div>
-
-<div class="modal" id="demoModal">
-  <div class="modal-content">
-    <div class="modal-title" id="demoTitle">Halo</div>
-    <div class="modal-desc" id="demoDesc">Arti: Salam atau sapaan</div>
+<div class="modal" id="modal">
+  <div class="modal-bg">
+    <div class="modal-title" id="modalTitle">Halo</div>
+    <div class="modal-text" id="modalText">Arti: Salam</div>
     <div class="modal-demo">
-      <div style="font-size:24px;margin-bottom:8px">👋</div>
-      <div class="modal-demo-text" id="demoHow">Buat kepalan tangan atau kibas</div>
+      <div class="modal-demo-big" id="modalEmoji">👋</div>
+      <div id="modalHow">Cara: Buat kepalan tangan atau kibas</div>
     </div>
     <div class="modal-btns">
-      <button class="modal-btn ok" onclick="closeDemoModal()">Mengerti</button>
+      <button class="modal-btn ok" onclick="closeModal()">Mengerti</button>
     </div>
   </div>
 </div>
@@ -144,7 +129,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         <div class="logo-sub">Indonesian Sign Language</div>
       </div>
     </div>
-    <div class="pill"><div class="dot ld" id="sDot"></div><span id="sTxt">Siap</span></div>
+    <div class="pill"><div class="dot ok" id="sDot"></div><span id="sTxt">Siap</span></div>
   </div>
 
   <div class="grid">
@@ -152,11 +137,13 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <div class="cam-wrap" id="camWrap">
         <video id="vid" playsinline autoplay muted></video>
         <canvas id="cvs"></canvas>
-        <div class="cr tl"></div><div class="cr tr"></div><div class="cr bl"></div><div class="cr br"></div>
-        <div class="badge" id="badge"><span class="bdot" id="bdot"></span><span id="btxt">Kamera belum aktif</span></div>
-        <div class="over" id="over"><div class="over-ico">📷</div><div class="over-txt">Klik tombol untuk mulai</div></div>
+        <div class="badge" id="badge">📷 Kamera belum aktif</div>
+        <div class="over" id="over">
+          <div class="over-ico">📷</div>
+          <div class="over-txt">Klik tombol untuk mulai</div>
+        </div>
       </div>
-      <div class="tip">💡 Tahan gestur sampai bar kuning penuh (~1 dtk). Deteksi natural berdasarkan posisi 21 titik tangan MediaPipe.</div>
+      <div class="tip">💡 Tahan gestur sampai bar kuning penuh. Deteksi real-time dengan 21 titik tangan.</div>
     </div>
 
     <div class="right">
@@ -165,35 +152,33 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
           <div class="lbl">Terdeteksi</div>
           <div class="big dim" id="bigW">—</div>
           <div class="sub" id="subW">Arahkan tangan ke kamera</div>
-          <div class="reason-txt" id="reasonTxt"></div>
+          <div class="reason" id="reason"></div>
           <div class="bar-row">
             <div class="bar-pct" id="bPct">0%</div>
             <div class="bar-track"><div class="bar-fill" id="bFill"></div></div>
           </div>
-          <div class="hold-track"><div class="hold-fill" id="hFill"></div></div>
-          <div class="hold-lbl" id="holdLbl">Tahan untuk commit kata</div>
         </div>
 
         <div class="sent-card">
           <div class="sent-top">
             <div class="lbl" style="margin:0">Kalimat</div>
             <div class="acts">
-              <button class="ibtn" id="btnSp" title="Ucapkan">🔊</button>
-              <button class="ibtn" id="btnDel" title="Hapus kata">⌫</button>
-              <button class="ibtn" id="btnClr" title="Reset">✕</button>
+              <button class="btn-ico" id="btnSp" title="Ucapkan">🔊</button>
+              <button class="btn-ico" id="btnDel" title="Hapus">⌫</button>
+              <button class="btn-ico" id="btnClr" title="Reset">✕</button>
             </div>
           </div>
           <div class="sent-txt empty" id="sentBox">Tunjukkan gestur...</div>
-          <div class="tts-row">
-            <button class="tts-btn on" id="btnAuto">🔊 Auto</button>
-            <button class="tts-btn" id="btnMute">🔇 Diam</button>
+          <div class="button-group">
+            <button id="btnAuto" class="on">🔊 Auto</button>
+            <button id="btnMute">🔇 Diam</button>
           </div>
         </div>
 
         <button class="start-btn" id="btnCam"><span>▶</span> Mulai Kamera</button>
 
         <div class="ref-card">
-          <div class="lbl">Gestur yang Dikenali (klik untuk pelajari)</div>
+          <div class="lbl">Gestur (tap untuk pelajari)</div>
           <div class="rgrid" id="rg"></div>
         </div>
       </div>
@@ -201,346 +186,271 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js"></script>
+
 <script>
-const vid=document.getElementById('vid'),cvs=document.getElementById('cvs'),ctx=cvs.getContext('2d');
-const bigW=document.getElementById('bigW'),subW=document.getElementById('subW'),reasonTxt=document.getElementById('reasonTxt');
-const bFill=document.getElementById('bFill'),bPct=document.getElementById('bPct');
-const hFill=document.getElementById('hFill'),holdLbl=document.getElementById('holdLbl');
-const sentBox=document.getElementById('sentBox'),sDot=document.getElementById('sDot'),sTxt=document.getElementById('sTxt');
-const badge=document.getElementById('badge'),bdot=document.getElementById('bdot'),btxt=document.getElementById('btxt');
-const over=document.getElementById('over'),camWrap=document.getElementById('camWrap'),detCard=document.getElementById('detCard');
-const errToast=document.getElementById('errToast'),demoModal=document.getElementById('demoModal');
-
-let words=[],lastCommit='',lastCommitT=0,camOn=false,autoSpeak=true;
-let buf=[],holdMs=900;
-let toastTimer=null;
-
-function showErr(msg){
-  if(msg){
-    errToast.textContent=msg;errToast.className='err-toast show';
-    clearTimeout(toastTimer);toastTimer=setTimeout(()=>{errToast.className='err-toast';},4000);
-  } else {errToast.className='err-toast';}
-}
-
-function showDemoModal(gesture){
-  const el=document.getElementById('demoTitle');
-  el.textContent=gesture.word;
-  document.getElementById('demoDesc').textContent='Arti: '+gesture.arti;
-  document.getElementById('demoHow').textContent=gesture.cara;
-  demoModal.classList.add('show');
-}
-
-function closeDemoModal(){
-  demoModal.classList.remove('show');
-}
-
 const GESTURES=[
-  {id:'halo',word:'Halo',arti:'Salam atau sapaan',cara:'Buat kepalan tangan, kibas ke depan',emoji:'👋',tips:'Gerakan seperti melambaikan tangan'},
-  {id:'saya',word:'Saya',arti:'Mengacu pada diri sendiri',cara:'Kepalan di dada, titik ke diri',emoji:'👆',tips:'Jari atau kepalan menunjuk ke tubuh Anda'},
-  {id:'kamu',word:'Kamu',arti:'Mengacu pada orang lain',cara:'Jari telunjuk menunjuk ke depan',emoji:'☝️',tips:'Telunjuk lurus, menunjuk ke arah orang'},
-  {id:'tolong',word:'Tolong',arti:'Meminta pertolongan',cara:'3 jari terbuka (telunjuk+tengah+manis)',emoji:'🤲',tips:'Tangan terbuka dengan 3 jari, posisi hadap ke bawah'},
-  {id:'terima_kasih',word:'Terima kasih',arti:'Ungkapan rasa terima kasih',cara:'Gerakan rock sign (telunjuk+kelingking)',emoji:'🤘',tips:'Telunjuk dan kelingking berdiri, 3 jari di tengah ditekuk'},
-  {id:'ya',word:'Ya',arti:'Pernyataan setuju',cara:'Jempol ke atas',emoji:'👍',tips:'Buat kepalan, jempol terangkat ke atas'},
-  {id:'tidak',word:'Tidak',arti:'Pernyataan tidak setuju',cara:'Jempol ke bawah',emoji:'👎',tips:'Buat kepalan, jempol arahkan ke bawah'},
-  {id:'mengerti',word:'Mengerti',arti:'Paham atau setuju',cara:'Bentuk O dengan ibu jari dan telunjuk',emoji:'👌',tips:'Ibu jari dan telunjuk bertemu membentuk lingkaran'},
-  {id:'damai',word:'Damai',arti:'Perdamaian atau V untuk kemenangan',cara:'Dua jari membentuk V (telunjuk+tengah)',emoji:'✌️',tips:'Telunjuk dan tengah terbuka membentuk huruf V'},
-  {id:'cinta',word:'Cinta',arti:'Ungkapan kasih sayang',cara:'ILY hand sign (jempol+telunjuk+kelingking)',emoji:'🤟',tips:'3 jari: jempol, telunjuk, kelingking terbuka, tengah+manis ditekuk'},
-  {id:'hubungi',word:'Hubungi',arti:'Permintaan menghubungi/telepon',cara:'Bentuk telepon (jempol+kelingking di telinga)',emoji:'☎️',tips:'Jempol dan kelingking terangkat, posisi di samping telinga'},
-  {id:'sampai_jumpa',word:'Sampai jumpa',arti:'Salam perpisahan',cara:'Semua 5 jari terbuka (telapak tangan)',emoji:'👋',tips:'Tangan terbuka penuh, semua jari terangkat'},
-  {id:'tidak_tahu',word:'Tidak tahu',arti:'Tidak mengetahui atau bingung',cara:'Semua jari menyebar (shoulder shrug)',emoji:'🤷',tips:'Tangan terbuka, jari tersebar, gerakan ke samping'},
-  {id:'maaf',word:'Maaf',arti:'Permohonan maaf',cara:'Kepalan di dada, gerakan memutar',emoji:'🙏',tips:'Kepalan di depan dada, gerakan memutar 2-3 kali'},
+  {id:'halo',word:'Halo',arti:'Salam atau sapaan',cara:'Buat kepalan tangan atau kibas',emoji:'👋'},
+  {id:'saya',word:'Saya',arti:'Mengacu pada diri sendiri',cara:'Kepalan di dada',emoji:'👆'},
+  {id:'kamu',word:'Kamu',arti:'Mengacu pada orang lain',cara:'Telunjuk menunjuk ke depan',emoji:'☝️'},
+  {id:'tolong',word:'Tolong',arti:'Meminta pertolongan',cara:'3 jari terbuka',emoji:'🤲'},
+  {id:'terima_kasih',word:'Terima kasih',arti:'Ungkapan rasa terima kasih',cara:'Rock sign (telunjuk+kelingking)',emoji:'🤘'},
+  {id:'ya',word:'Ya',arti:'Pernyataan setuju',cara:'Jempol ke atas',emoji:'👍'},
+  {id:'tidak',word:'Tidak',arti:'Pernyataan tidak setuju',cara:'Jempol ke bawah',emoji:'👎'},
+  {id:'mengerti',word:'Mengerti',arti:'Paham atau setuju',cara:'Bentuk O dengan ibu jari dan telunjuk',emoji:'👌'},
+  {id:'damai',word:'Damai',arti:'Perdamaian atau V untuk kemenangan',cara:'Dua jari membentuk V',emoji:'✌️'},
+  {id:'cinta',word:'Cinta',arti:'Ungkapan kasih sayang',cara:'ILY hand sign',emoji:'🤟'},
+  {id:'hubungi',word:'Hubungi',arti:'Permintaan menghubungi',cara:'Bentuk telepon',emoji:'☎️'},
+  {id:'sampai_jumpa',word:'Sampai jumpa',arti:'Salam perpisahan',cara:'Semua 5 jari terbuka',emoji:'👋'},
+  {id:'tidak_tahu',word:'Tidak tahu',arti:'Tidak mengetahui',cara:'Semua jari menyebar',emoji:'🤷'},
+  {id:'maaf',word:'Maaf',arti:'Permohonan maaf',cara:'Kepalan di dada dengan gerakan memutar',emoji:'🙏'},
 ];
 
-const rg=document.getElementById('rg'),riEls={};
+const riEls={};
+const rg=document.getElementById('rg');
 GESTURES.forEach(g=>{
-  const el=document.createElement('div');el.className='ri';el.id='ri-'+g.id;
-  el.innerHTML=`<div style="font-size:18px;margin-bottom:4px">${g.emoji}</div><div class="ri-w">${g.word}</div><div class="ri-d">${g.arti}</div><div class="ri-demo">tap untuk pelajari</div>`;
-  el.onclick=()=>showDemoModal(g);
-  rg.appendChild(el);riEls[g.id]=el;
+  const el=document.createElement('div');
+  el.className='ri';
+  el.innerHTML=`<div class="ri-emoji">${g.emoji}</div><div class="ri-w">${g.word}</div><div class="ri-d">${g.arti}</div>`;
+  el.onclick=()=>showModal(g);
+  rg.appendChild(el);
+  riEls[g.id]=el;
 });
 
-function setHi(id){Object.values(riEls).forEach(e=>e.classList.remove('hi'));if(id&&riEls[id])riEls[id].classList.add('hi');}
+function showModal(g){
+  document.getElementById('modalTitle').textContent=g.word;
+  document.getElementById('modalText').textContent='Arti: '+g.arti;
+  document.getElementById('modalEmoji').textContent=g.emoji;
+  document.getElementById('modalHow').textContent='Cara: '+g.cara;
+  document.getElementById('modal').classList.add('show');
+}
 
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+}
+
+function setHi(id){
+  Object.values(riEls).forEach(e=>e.classList.remove('hi'));
+  if(id&&riEls[id])riEls[id].classList.add('hi');
+}
+
+// STATE
+let words=[],lastCommit='',lastCommitT=0,camOn=false,autoSpeak=true;
+let buf=[],holdMs=900;
+
+// ELEMENTS
+const vid=document.getElementById('vid');
+const cvs=document.getElementById('cvs');
+const ctx=cvs.getContext('2d');
+const bigW=document.getElementById('bigW');
+const subW=document.getElementById('subW');
+const reason=document.getElementById('reason');
+const bFill=document.getElementById('bFill');
+const bPct=document.getElementById('bPct');
+const sentBox=document.getElementById('sentBox');
+const badge=document.getElementById('badge');
+const over=document.getElementById('over');
+const detCard=document.getElementById('detCard');
+const camWrap=document.getElementById('camWrap');
+const sDot=document.getElementById('sDot');
+const sTxt=document.getElementById('sTxt');
+const errToast=document.getElementById('errToast');
+
+// UTILS
 function dist2d(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 function ang(a,b,c){
   const v1={x:a.x-b.x,y:a.y-b.y},v2={x:c.x-b.x,y:c.y-b.y};
   const d=v1.x*v2.x+v1.y*v2.y,m=Math.hypot(v1.x,v1.y)*Math.hypot(v2.x,v2.y);
   return m?Math.acos(Math.max(-1,Math.min(1,d/m)))*180/Math.PI:0;
 }
-
 function isExt(lm,a,b,c){return ang(lm[a],lm[b],lm[c])>140;}
 function isCurl(lm,a,b,c){return ang(lm[a],lm[b],lm[c])<100;}
 
-function getFingerState(lm){
-  return {
-    thumb:{ext:isExt(lm,2,3,4),curl:isCurl(lm,2,3,4),tip:lm[4],base:lm[2]},
-    index:{ext:isExt(lm,5,6,8),curl:isCurl(lm,5,6,8),tip:lm[8],base:lm[5]},
-    middle:{ext:isExt(lm,9,10,12),curl:isCurl(lm,9,10,12),tip:lm[12],base:lm[9]},
-    ring:{ext:isExt(lm,13,14,16),curl:isCurl(lm,13,14,16),tip:lm[16],base:lm[13]},
-    pinky:{ext:isExt(lm,17,18,20),curl:isCurl(lm,17,18,20),tip:lm[20],base:lm[17]}
+function classify(lm){
+  const f={
+    thumb:{ext:isExt(lm,2,3,4),curl:isCurl(lm,2,3,4)},
+    index:{ext:isExt(lm,5,6,8),curl:isCurl(lm,5,6,8)},
+    middle:{ext:isExt(lm,9,10,12),curl:isCurl(lm,9,10,12)},
+    ring:{ext:isExt(lm,13,14,16),curl:isCurl(lm,13,14,16)},
+    pinky:{ext:isExt(lm,17,18,20),curl:isCurl(lm,17,18,20)}
   };
-}
-
-function classifyGesture(lm){
-  const f=getFingerState(lm);
-  const w=lm[0];const pw=dist2d(lm[5],lm[17])||0.001;
-  
-  // Count extended and curled fingers
+  const w=lm[0];
+  const pw=dist2d(lm[5],lm[17])||0.001;
   const ext=[f.index.ext,f.middle.ext,f.ring.ext,f.pinky.ext].filter(Boolean).length;
   const curl=[f.index.curl,f.middle.curl,f.ring.curl,f.pinky.curl].filter(Boolean).length;
-  
-  // Thumb position
-  const tD=dist2d(lm[4],lm[8])/pw;const tSp=dist2d(lm[4],lm[5])/pw;const tU=lm[4].y<w.y-0.1;const tD2=lm[4].y>w.y+0.1;
-  
-  // Palm position and orientation
-  const palmY=(lm[9].y+w.y)/2;const tipDist=dist2d(lm[8],lm[4])/pw;
+  const thumbSep=dist2d(lm[4],lm[5])/pw;
+  const thumbUp=lm[4].y<w.y-0.1;
+  const thumbDn=lm[4].y>w.y+0.1;
+  const palmY=(lm[9].y+w.y)/2;
+  const tipD=dist2d(lm[8],lm[4])/pw;
   const idxZ=(w.z||0)-(lm[8].z||0);
   
-  // Rock sign: index + pinky extended, middle + ring curled
-  if(f.index.ext&&f.pinky.ext&&f.middle.curl&&f.ring.curl&&!f.thumb.ext){
-    return{id:'terima_kasih',conf:88,reason:'Rock sign: telunjuk+kelingking'};
-  }
-  
-  // V peace: index + middle extended, ring + pinky curled
-  if(f.index.ext&&f.middle.ext&&!f.ring.ext&&!f.pinky.ext&&!f.thumb.ext){
-    return{id:'damai',conf:87,reason:'V peace sign'};
-  }
-  
-  // ILY: thumb + index + pinky, middle + ring curled
-  if(f.thumb.ext&&f.index.ext&&f.pinky.ext&&f.middle.curl&&f.ring.curl){
-    return{id:'cinta',conf:86,reason:'ILY hand sign'};
-  }
-  
-  // OK sign: thumb + index circle
-  if(tipDist<0.35&&ext<=2){
-    return{id:'mengerti',conf:80,reason:'OK gesture'};
-  }
-  
-  // Thumbs up: thumb extended up, fist
-  if(f.thumb.ext&&curl>=3&&tU){
-    return{id:'ya',conf:88,reason:'Jempol ke atas'};
-  }
-  
-  // Thumbs down: thumb extended down, fist
-  if(f.thumb.ext&&curl>=3&&tD2){
-    return{id:'tidak',conf:87,reason:'Jempol ke bawah'};
-  }
-  
-  // Three fingers: index + middle + ring
-  if(f.index.ext&&f.middle.ext&&f.ring.ext&&!f.pinky.ext&&!f.thumb.ext){
-    return{id:'tolong',conf:85,reason:'3 jari terbuka'};
-  }
-  
-  // Point gesture: only index extended, pointing
-  if(f.index.ext&&!f.middle.ext&&!f.ring.ext&&!f.pinky.ext&&!f.thumb.ext&&idxZ>0.02){
-    return{id:'kamu',conf:86,reason:'Telunjuk menunjuk ke depan'};
-  }
-  
-  // All fingers open
-  if(ext===4&&!f.thumb.ext){
-    return{id:'sampai_jumpa',conf:85,reason:'Semua 5 jari terbuka'};
-  }
-  
-  // Fist at chest: "maaf" or "saya"
+  if(f.index.ext&&f.pinky.ext&&f.middle.curl&&f.ring.curl&&!f.thumb.ext)
+    return{id:'terima_kasih',conf:88};
+  if(f.index.ext&&f.middle.ext&&!f.ring.ext&&!f.pinky.ext&&!f.thumb.ext)
+    return{id:'damai',conf:87};
+  if(f.thumb.ext&&f.index.ext&&f.pinky.ext&&f.middle.curl&&f.ring.curl)
+    return{id:'cinta',conf:86};
+  if(tipD<0.35&&ext<=2)
+    return{id:'mengerti',conf:82};
+  if(f.thumb.ext&&curl>=3&&thumbUp)
+    return{id:'ya',conf:88};
+  if(f.thumb.ext&&curl>=3&&thumbDn)
+    return{id:'tidak',conf:87};
+  if(f.index.ext&&f.middle.ext&&f.ring.ext&&!f.pinky.ext&&!f.thumb.ext)
+    return{id:'tolong',conf:85};
+  if(f.index.ext&&!f.middle.ext&&!f.ring.ext&&!f.pinky.ext&&!f.thumb.ext&&idxZ>0.02)
+    return{id:'kamu',conf:86};
+  if(ext===4&&!f.thumb.ext)
+    return{id:'sampai_jumpa',conf:85};
   if(curl>=3&&!f.thumb.ext){
-    if(palmY>0.5){
-      return{id:'saya',conf:83,reason:'Kepalan di dada'};
-    }
-    return{id:'maaf',conf:80,reason:'Kepalan di dada'};
+    if(palmY>0.5)return{id:'saya',conf:83};
+    return{id:'maaf',conf:80};
   }
-  
-  // Wave/hello: all fingers various states, moving
-  if((ext>=2||curl>=2)&&!f.thumb.ext){
-    return{id:'halo',conf:75,reason:'Gerakan kibas'};
-  }
-  
-  // All fingers spread (tidak_tahu)
-  if(ext===4&&f.thumb.ext){
-    return{id:'tidak_tahu',conf:78,reason:'Semua jari menyebar'};
-  }
-  
-  return{id:null,conf:0,reason:''};
+  if((ext>=2||curl>=2)&&!f.thumb.ext)
+    return{id:'halo',conf:75};
+  if(ext===4&&f.thumb.ext)
+    return{id:'tidak_tahu',conf:78};
+  return{id:null,conf:0};
 }
 
 const CONN=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
-
 function drawHand(lm){
   const W=cvs.width,H=cvs.height,p=pt=>[pt.x*W,pt.y*H];
   ctx.save();
-  
-  // Draw connections
   CONN.forEach(([a,b])=>{
     const [ax,ay]=p(lm[a]),[bx,by]=p(lm[b]);
     ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);
-    ctx.strokeStyle='rgba(0,217,126,0.25)';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.stroke();
+    ctx.strokeStyle='rgba(0,217,126,0.3)';ctx.lineWidth=2;ctx.lineCap='round';ctx.stroke();
   });
-  
-  // Draw landmarks - bigger size
   lm.forEach((pt,i)=>{
     const [x,y]=p(pt);
     const tip=[4,8,12,16,20].includes(i);
-    const joint=[3,7,11,15,19].includes(i);
-    
-    let sz=3;
-    if(tip)sz=5.5;
-    else if(joint)sz=4;
-    
-    ctx.beginPath();ctx.arc(x,y,sz,0,Math.PI*2);
-    if(tip){
-      ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,217,126,0.8)';ctx.shadowBlur=8;ctx.fill();
-    }else{
-      ctx.fillStyle='#00d97e';ctx.fill();
-    }
+    ctx.beginPath();ctx.arc(x,y,tip?5:3,0,Math.PI*2);
+    ctx.fillStyle=tip?'#fff':'#00d97e';ctx.fill();
   });
-  ctx.shadowColor='transparent';
   ctx.restore();
 }
 
-function speak(txt){if(!autoSpeak||!txt)return;const u=new SpeechSynthesisUtterance(txt);u.lang='id-ID';u.rate=0.9;speechSynthesis.cancel();speechSynthesis.speak(u);}
+function speak(txt){
+  if(!autoSpeak||!txt)return;
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang='id-ID';u.rate=0.9;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
 
-function updSentence(){if(words.length){sentBox.className='sent-txt';sentBox.textContent=words.join(' ');}else{sentBox.className='sent-txt empty';sentBox.textContent='Tunjukkan gestur...';}}
+function updSentence(){
+  if(words.length){
+    sentBox.className='sent-txt';
+    sentBox.textContent=words.join(' ');
+  }else{
+    sentBox.className='sent-txt empty';
+    sentBox.textContent='Tunjukkan gestur...';
+  }
+}
 
-document.getElementById('btnDel').onclick=()=>{words.pop();updSentence();};
-document.getElementById('btnDel').addEventListener('touchend',()=>{words.pop();updSentence();});
-document.getElementById('btnClr').onclick=()=>{words=[];updSentence();};
-document.getElementById('btnClr').addEventListener('touchend',()=>{words=[];updSentence();});
-document.getElementById('btnSp').onclick=()=>{const t=words.join(' ');if(t){const u=new SpeechSynthesisUtterance(t);u.lang='id-ID';u.rate=0.88;speechSynthesis.cancel();speechSynthesis.speak(u);}};
-document.getElementById('btnSp').addEventListener('touchend',()=>{const t=words.join(' ');if(t){const u=new SpeechSynthesisUtterance(t);u.lang='id-ID';u.rate=0.88;speechSynthesis.cancel();speechSynthesis.speak(u);}});
-document.getElementById('btnAuto').onclick=()=>{autoSpeak=true;document.getElementById('btnAuto').classList.add('on');document.getElementById('btnMute').classList.remove('on');};
-document.getElementById('btnAuto').addEventListener('touchend',()=>{autoSpeak=true;document.getElementById('btnAuto').classList.add('on');document.getElementById('btnMute').classList.remove('on');});
-document.getElementById('btnMute').onclick=()=>{autoSpeak=false;document.getElementById('btnMute').classList.add('on');document.getElementById('btnAuto').classList.remove('on');};
-document.getElementById('btnMute').addEventListener('touchend',()=>{autoSpeak=false;document.getElementById('btnMute').classList.add('on');document.getElementById('btnAuto').classList.remove('on');});
-function showRes(id,conf,word,reason){
-  bigW.textContent=word||'—';bigW.className='big';
-  subW.textContent=conf>78?'✓ Terdeteksi jelas':conf>65?'Tahan lebih stabil...':'Arahkan lebih jelas...';
-  reasonTxt.textContent=reason?reason:'';
-  bFill.style.width=conf+'%';bPct.textContent=Math.round(conf)+'%';
-  bFill.style.background=conf>78?'#00d97e':conf>55?'#f5a623':'#f54269';
-  detCard.classList.add('lit');setHi(id);
+function showRes(id,conf,word,info){
+  bigW.textContent=word||'—';
+  bigW.className='big';
+  subW.textContent=conf>78?'✓ Jelas':conf>65?'Tahan lagi...':'Arahkan lebih baik...';
+  reason.textContent=info||'';
+  bFill.style.width=conf+'%';
+  bPct.textContent=Math.round(conf)+'%';
+  detCard.classList.add('lit');
+  setHi(id);
 }
 
 function showNone(){
-  bigW.textContent='—';bigW.className='big dim';subW.textContent='Arahkan tangan ke kamera';
-  reasonTxt.textContent='';bFill.style.width='0%';bPct.textContent='0%';
-  hFill.style.width='0%';holdLbl.textContent='Tahan untuk commit kata';
-  detCard.classList.remove('lit');setHi(null);buf=[];
+  bigW.textContent='—';bigW.className='big dim';
+  subW.textContent='Arahkan tangan ke kamera';
+  reason.textContent='';
+  bFill.style.width='0%';bPct.textContent='0%';
+  detCard.classList.remove('lit');
+  setHi(null);
+  buf=[];
 }
 
 function processFrame(lm){
-  const res=classifyGesture(lm);
-  const{id,conf,reason}=res;
-  
+  const res=classify(lm);
+  const{id,conf}=res;
   if(!id){showNone();return;}
-  
   const g=GESTURES.find(x=>x.id===id);
   const word=g?.word||id;
-  
   const now=Date.now();
-  buf.push({id,conf,word,reason,t:now});
+  buf.push({id,conf,word,t:now});
   buf=buf.filter(g=>now-g.t<=holdMs+300);
-  
-  // Majority voting
   const counts={};
   buf.forEach(g=>{counts[g.id]=(counts[g.id]||0)+1;});
   let dom=id,mx=0;
   Object.entries(counts).forEach(([k,v])=>{if(v>mx){mx=v;dom=k;}});
-  
   const domBuf=buf.filter(g=>g.id===dom);
-  const oldest=domBuf[0];
-  const held=oldest?now-oldest.t:0;
+  const oldest=domBuf[0];const held=oldest?now-oldest.t:0;
   const ratio=mx/buf.length;
   const last=domBuf[domBuf.length-1];
-  
-  showRes(dom,conf,last?.word||word,last?.reason||reason);
-  
-  if(ratio>0.62&&conf>68){
-    const pct=Math.min(100,Math.round(held/holdMs*100));
-    hFill.style.width=pct+'%';
-    holdLbl.textContent=pct<100?`Tahan... ${pct}%`:'✓ Terkunci!';
-  }else{
-    hFill.style.width='0%';
-    holdLbl.textContent='Tahan untuk commit kata';
-  }
-  
-  if(ratio>0.62&&held>=holdMs&&conf>68&&(dom!==lastCommit||now-lastCommitT>1800)){
+  showRes(dom,conf,last?.word||word);
+  if(ratio>0.62&&conf>68&&held>=holdMs&&(dom!==lastCommit||now-lastCommitT>1800)){
     words.push(last?.word||word);
     updSentence();
     speak(last?.word||word);
     lastCommit=dom;
     lastCommitT=now;
     buf=[];
-    hFill.style.width='0%';
   }
 }
 
-document.getElementById('btnCam').onclick=async()=>{
+document.getElementById('btnSp').addEventListener('click',()=>{const t=words.join(' ');if(t){const u=new SpeechSynthesisUtterance(t);u.lang='id-ID';u.rate=0.88;speechSynthesis.cancel();speechSynthesis.speak(u);}});
+document.getElementById('btnDel').addEventListener('click',()=>{words.pop();updSentence();});
+document.getElementById('btnClr').addEventListener('click',()=>{words=[];updSentence();});
+document.getElementById('btnAuto').addEventListener('click',function(){autoSpeak=true;this.classList.add('on');document.getElementById('btnMute').classList.remove('on');});
+document.getElementById('btnMute').addEventListener('click',function(){autoSpeak=false;this.classList.add('on');document.getElementById('btnAuto').classList.remove('on');});
+
+document.getElementById('btnCam').addEventListener('click',async function(){
   if(camOn)return;
   camOn=true;
-  const btn=document.getElementById('btnCam');
-  btn.disabled=true;
-  btn.textContent='⏳ Memuat...';
-  sDot.className='dot ld';
+  this.disabled=true;
+  this.textContent='⏳ Memuat...';
+  sDot.className='dot';
   sTxt.textContent='Memuat...';
-  
-  const hands=new Hands({
-    locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${f}`
-  });
-  hands.setOptions({
-    maxNumHands:1,
-    modelComplexity:1,
-    minDetectionConfidence:0.7,
-    minTrackingConfidence:0.65
-  });
-  
+  const hands=new Hands({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${f}`});
+  hands.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:0.7,minTrackingConfidence:0.65});
   hands.onResults(r=>{
     cvs.width=vid.videoWidth||640;
     cvs.height=vid.videoHeight||480;
     ctx.clearRect(0,0,cvs.width,cvs.height);
-    
     if(r.multiHandLandmarks?.length){
       const lm=r.multiHandLandmarks[0];
       drawHand(lm);
       processFrame(lm);
-      badge.className='badge hand';
-      bdot.style.background='#00d97e';
-      bdot.style.boxShadow='0 0 5px #00d97e';
-      btxt.textContent='✋ Tangan terdeteksi';
+      badge.textContent='✋ Tangan terdeteksi';
     }else{
       showNone();
-      badge.className='badge';
-      bdot.style.background='#444';
-      bdot.style.boxShadow='none';
-      btxt.textContent='Mencari tangan...';
+      badge.textContent='📷 Mencari tangan...';
     }
   });
-  
   try{
-    const stream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:'user',width:640,height:480}
-    });
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480}});
     vid.srcObject=stream;
     await new Promise(r=>vid.onloadedmetadata=r);
     vid.play();
-    
     over.classList.add('gone');
     camWrap.classList.add('live');
     sDot.className='dot ok';
     sTxt.textContent='Live';
-    btn.textContent='● Kamera Aktif';
-    
-    const cam=new Camera(vid,{
-      onFrame:async()=>{await hands.send({image:vid});},
-      width:640,height:480
-    });
-    cam.start();
+    this.textContent='● Kamera Aktif';
+    new Camera(vid,{onFrame:async()=>{await hands.send({image:vid});},width:640,height:480}).start();
   }catch(e){
     camOn=false;
-    btn.disabled=false;
-    btn.innerHTML='<span>▶</span> Mulai Kamera';
+    this.disabled=false;
+    this.innerHTML='<span>▶</span> Mulai Kamera';
     sDot.className='dot';
     sTxt.textContent='Error';
-    showErr('Gagal akses kamera: '+e.message);
+    errToast.textContent='Error: '+e.message;
+    errToast.classList.add('show');
+    setTimeout(()=>errToast.classList.remove('show'),4000);
   }
-};
+});
+</script>
+</body>
+</html>
