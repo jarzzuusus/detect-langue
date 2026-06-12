@@ -515,7 +515,7 @@ document.getElementById('btnCam').addEventListener('click',async function(){
   sTxt.textContent='Memuat...';
   renderGestures();
   const hands=new Hands({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${f}`});
-  hands.setOptions({maxNumHands:2,modelComplexity:1,minDetectionConfidence:0.7,minTrackingConfidence:0.65});
+  hands.setOptions({maxNumHands:2,modelComplexity:0,minDetectionConfidence:0.5,minTrackingConfidence:0.5});
   hands.onResults(r=>{
     cvs.width=vid.videoWidth||640;
     cvs.height=vid.videoHeight||480;
@@ -531,7 +531,7 @@ document.getElementById('btnCam').addEventListener('click',async function(){
         drawHand(lm,color,dotColor);
         processHand(lm,side);
       });
-      const trainingLabel=isTraining?` (TRAINING ${trainHand==='right'?'Kanan':'Kiri'})`:'';
+      const trainingLabel=isTraining?' (TRAINING)':'';
       badge.textContent=`✋ ${detected} tangan terdeteksi${trainingLabel}`;
     }else{
       showHandNone('Left');showHandNone('Right');
@@ -542,7 +542,7 @@ document.getElementById('btnCam').addEventListener('click',async function(){
     if(!seenSides.has('Right'))showHandNone('Right');
   });
   try{
-    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480}});
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:320,height:240}});
     vid.srcObject=stream;
     await new Promise(r=>vid.onloadedmetadata=r);
     vid.play();
@@ -551,7 +551,7 @@ document.getElementById('btnCam').addEventListener('click',async function(){
     sDot.className='dot ok';
     sTxt.textContent='Live';
     this.textContent='● Kamera Aktif';
-    new Camera(vid,{onFrame:async()=>{await hands.send({image:vid});},width:640,height:480}).start();
+    new Camera(vid,{onFrame:async()=>{await hands.send({image:vid});},width:320,height:240}).start();
   }catch(e){
     camOn=false;
     this.disabled=false;
