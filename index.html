@@ -150,10 +150,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   <div class="modal-bg">
     <div class="modal-title">📝 Buat Gesture Baru</div>
     <div class="training-info">Arahkan tangan ke kamera dan tekan RECORD. Tahan pose selama 2 detik untuk training.</div>
-    <div class="train-hand-sel">
-      <button id="trainHandL" class="on" onclick="selectTrainHand('left',this)">✋ Kiri</button>
-      <button id="trainHandR" onclick="selectTrainHand('right',this)">🤚 Kanan</button>
-    </div>
     <input type="text" class="modal-input" id="trainName" placeholder="Nama gesture (misal: Ngepel, Salim, dll)">
     <input type="text" class="modal-input" id="trainArti" placeholder="Arti gesture (misal: Membersihkan, Menyapa, dll)">
     <div class="modal-btns">
@@ -297,9 +293,8 @@ function setHi(id){
   if(id&&riEls[id])riEls[id].classList.add('hi');
 }
 
-let words=[],lastCommit='',lastCommitT=0,camOn=false,autoSpeak=true;
-let buf=[],holdMs=900;
-let trainingData=null,isTraining=false,trainingFrames=[],trainHand='left';
+let words=[],camOn=false,autoSpeak=true;
+let holdMs=700,isTraining=false,trainingFrames=[];
 
 const vid=document.getElementById('vid');
 const cvs=document.getElementById('cvs');
@@ -317,18 +312,13 @@ const wordL=document.getElementById('wordL'),wordR=document.getElementById('word
 const pctL=document.getElementById('pctL'),pctR=document.getElementById('pctR');
 const barL=document.getElementById('barL'),barR=document.getElementById('barR');
 
+// Per-hand detection state
 const handState={
   Left:{buf:[],lastCommit:'',lastCommitT:0},
   Right:{buf:[],lastCommit:'',lastCommitT:0}
 };
-
-function selectTrainHand(hand,btn){
-  trainHand=hand;
-  document.getElementById('trainHandL').classList.remove('on','r');
-  document.getElementById('trainHandR').classList.remove('on','r');
-  btn.classList.add('on');
-  if(hand==='right')btn.classList.add('r');
-}
+// Shared commit guard — prevents double commit when both hands show same gesture
+let sharedLastCommit='',sharedLastCommitT=0;
 
 function dist2d(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 function ang(a,b,c){
@@ -434,7 +424,7 @@ function showHandNone(side){
 }
 
 function processHand(lm,side){
-  if(isTraining&&((trainHand==='left'&&side==='Left')||(trainHand==='right'&&side==='Right'))){
+  if(isTraining){
     trainingFrames.push(lm);
     return;
   }
@@ -442,7 +432,7 @@ function processHand(lm,side){
   let best={id:null,conf:0};
   const v=getHandVector(lm);
   for(const cg of customGestures){
-    if(cg.vector&&(!cg.hand||(cg.hand==='left'&&side==='Left')||(cg.hand==='right'&&side==='Right'))){
+    if(cg.vector){
       const conf=compare(v,cg.vector);
       if(conf>best.conf) best={id:cg.id,conf};
     }
@@ -464,13 +454,15 @@ function processHand(lm,side){
   const ratio=mx/st.buf.length;
   const last=domBuf[domBuf.length-1];
   showHandRes(side,dom,best.conf,last?.word||word);
-  if(ratio>0.62&&best.conf>68&&held>=holdMs&&(dom!==st.lastCommit||now-st.lastCommitT>1800)){
+  // Use shared commit guard so both hands showing same gesture = 1 commit only
+  if(ratio>0.62&&best.conf>68&&held>=holdMs&&(dom!==sharedLastCommit||now-sharedLastCommitT>1800)){
     words.push(last?.word||word);
     updSentence();
     speak(last?.word||word);
-    st.lastCommit=dom;
-    st.lastCommitT=now;
+    sharedLastCommit=dom;
+    sharedLastCommitT=now;
     st.buf=[];
+    handState[side==='Left'?'Right':'Left'].buf=[];
   }
 }
 
@@ -501,7 +493,7 @@ function startTraining(){
       const avgFrame=trainingFrames[Math.floor(trainingFrames.length/2)];
       const vector=getHandVector(avgFrame);
       const id='custom_'+Date.now();
-      customGestures.push({id,word:name,arti,cara:'Custom gesture yang Anda buat',emoji:'📌',custom:true,hand:trainHand,vector});
+      customGestures.push({id,word:name,arti,cara:'Custom gesture yang Anda buat',emoji:'📌',custom:true,vector});
       localStorage.setItem('customGestures',JSON.stringify(customGestures));
       allGestures=[...GESTURES,...customGestures];
       renderGestures();
