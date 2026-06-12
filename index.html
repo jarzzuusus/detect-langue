@@ -3,177 +3,153 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deteksi Bahasa Isyarat</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --neon: #00ff88;
-    --neon-dim: rgba(0,255,136,0.15);
-    --neon-glow: 0 0 12px rgba(0,255,136,0.6);
-    --bg: #0a0a0f;
-    --bg2: #111118;
-    --bg3: #1a1a24;
-    --card: #16161f;
-    --border: rgba(255,255,255,0.08);
-    --border-neon: rgba(0,255,136,0.3);
-    --text: #f0f0f8;
-    --text2: #8888aa;
-    --text3: #555570;
-    --amber: #ffb800;
-    --red: #ff4466;
-    --radius: 16px;
-    --radius-sm: 10px;
-  }
-  body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .container { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; position: relative; z-index: 1; }
-  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--neon-dim); border: 1px solid var(--border-neon); display: flex; align-items: center; justify-content: center; font-size: 20px; }
-  .logo-text { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
-  .logo-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
-  .status-pill { display: flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg2); font-size: 12px; color: var(--text2); }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); transition: background 0.3s; }
-  .dot.active { background: var(--neon); box-shadow: var(--neon-glow); }
-  .dot.loading { background: var(--amber); animation: blink 1s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .main-grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
-  @media (max-width: 700px) { .main-grid { grid-template-columns: 1fr; } }
-  .cam-card { border-radius: var(--radius); overflow: hidden; background: #000; border: 1px solid var(--border); position: relative; aspect-ratio: 4/3; }
-  .cam-card.active { border-color: var(--border-neon); }
-  #videoEl { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
-  #canvasEl { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); pointer-events: none; }
-  .cam-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg2); transition: opacity 0.4s; }
-  .cam-overlay.hidden { opacity: 0; pointer-events: none; }
-  .cam-overlay-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
-  .cam-overlay-text { font-size: 14px; color: var(--text2); }
-  .cam-badge { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: 999px; padding: 5px 14px; font-size: 12px; color: #fff; white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: border-color 0.3s; }
-  .cam-badge.hand { border-color: var(--border-neon); color: var(--neon); }
-  .corner { position: absolute; width: 20px; height: 20px; opacity: 0.4; }
-  .corner.tl { top: 8px; left: 8px; border-top: 2px solid var(--neon); border-left: 2px solid var(--neon); }
-  .corner.tr { top: 8px; right: 8px; border-top: 2px solid var(--neon); border-right: 2px solid var(--neon); }
-  .corner.bl { bottom: 8px; left: 8px; border-bottom: 2px solid var(--neon); border-left: 2px solid var(--neon); }
-  .corner.br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--neon); border-right: 2px solid var(--neon); }
-  .panel { display: flex; flex-direction: column; gap: 12px; }
-  .letter-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; position: relative; overflow: hidden; transition: border-color 0.3s; }
-  .letter-card.detected { border-color: var(--border-neon); }
-  .letter-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center top, rgba(0,255,136,0.06) 0%, transparent 60%); pointer-events: none; }
-  .letter-label { font-size: 11px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; }
-  .letter-big { font-size: 40px; font-weight: 700; line-height: 1.2; color: var(--neon); text-shadow: var(--neon-glow); min-height: 48px; display: flex; align-items: center; justify-content: center; text-align: center; transition: all 0.15s; word-break: keep-all; }
-  .letter-big.dim { color: var(--text3); text-shadow: none; font-size: 28px; }
-  .letter-desc { font-size: 13px; color: var(--text2); margin-top: 8px; min-height: 18px; }
-  .conf-wrap { margin-top: 14px; display: flex; align-items: center; gap: 10px; }
-  .conf-label { font-size: 11px; color: var(--text3); width: 28px; text-align: right; }
-  .conf-track { flex: 1; height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
-  .conf-fill { height: 100%; border-radius: 2px; background: var(--neon); box-shadow: 0 0 8px rgba(0,255,136,0.4); transition: width 0.2s ease, background 0.2s; width: 0%; }
-  .sentence-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
-  .sentence-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .sentence-label { font-size: 11px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; }
-  .sentence-actions { display: flex; gap: 6px; }
-  .icon-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; }
-  .icon-btn:hover { background: var(--bg3); color: var(--text); border-color: rgba(255,255,255,0.15); }
-  .sentence-text { font-size: 18px; font-weight: 600; letter-spacing: 0.3px; color: var(--text); min-height: 32px; word-break: break-word; line-height: 1.5; }
-  .sentence-text.empty { font-size: 13px; color: var(--text3); letter-spacing: 0; font-weight: 400; }
-  .start-btn { width: 100%; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-neon); background: var(--neon-dim); color: var(--neon); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; letter-spacing: 0.3px; }
-  .start-btn:hover { background: rgba(0,255,136,0.25); box-shadow: var(--neon-glow); }
-  .start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .ref-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
-  .ref-card-label { font-size: 11px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin-bottom: 12px; }
-  .ref-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-  .ref-item { border: 1px solid var(--border); border-radius: 8px; padding: 8px 6px; text-align: center; background: var(--bg2); cursor: default; transition: border-color 0.2s; }
-  .ref-item:hover { border-color: var(--border-neon); }
-  .ref-item.active-gesture { border-color: var(--neon); background: var(--neon-dim); }
-  .ri-letter { font-size: 13px; font-weight: 700; color: var(--text); }
-  .ri-desc { font-size: 9px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
-  .tip { font-size: 11px; color: var(--text3); display: flex; gap: 6px; align-items: flex-start; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg2); line-height: 1.5; }
-  .tip-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --neon:#00d97e;--neon-dim:rgba(0,217,126,0.12);--neon-glow:0 0 10px rgba(0,217,126,0.5);
+  --bg:#0c0c10;--bg2:#13131a;--bg3:#1a1a24;--card:#161620;
+  --border:rgba(255,255,255,0.07);--border-neon:rgba(0,217,126,0.28);
+  --text:#eeeef5;--text2:#8888aa;--text3:#44445a;
+  --amber:#f5a623;--red:#f54269;
+  --r:14px;--rs:9px;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,217,126,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,217,126,0.025) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;z-index:0}
+.wrap{max-width:940px;margin:0 auto;padding:20px 14px 40px;position:relative;z-index:1}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-ico{width:36px;height:36px;border-radius:9px;background:var(--neon-dim);border:1px solid var(--border-neon);display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-name{font-size:16px;font-weight:600;letter-spacing:-.3px}
+.logo-sub{font-size:11px;color:var(--text2)}
+.pill{display:flex;align-items:center;gap:6px;padding:5px 13px;border-radius:999px;border:1px solid var(--border);background:var(--bg2);font-size:12px;color:var(--text2)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--text3);transition:background .3s}
+.dot.ok{background:var(--neon);box-shadow:var(--neon-glow)}
+.dot.ld{background:var(--amber);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.grid{display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start}
+@media(max-width:680px){.grid{grid-template-columns:1fr}}
+.cam-wrap{border-radius:var(--r);overflow:hidden;background:#000;border:1px solid var(--border);position:relative;aspect-ratio:4/3}
+.cam-wrap.live{border-color:var(--border-neon)}
+#vid{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
+#cvs{position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1);pointer-events:none}
+.over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg2);transition:opacity .4s}
+.over.gone{opacity:0;pointer-events:none}
+.over-ico{font-size:44px;margin-bottom:10px;opacity:.25}
+.over-txt{font-size:13px;color:var(--text2)}
+.badge{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.72);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:999px;padding:4px 13px;font-size:11px;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:border-color .3s}
+.badge.hand{border-color:var(--border-neon);color:var(--neon)}
+.bdot{width:5px;height:5px;border-radius:50%;background:#444;display:inline-block}
+.cr{position:absolute;width:18px;height:18px;opacity:.35}
+.cr.tl{top:7px;left:7px;border-top:2px solid var(--neon);border-left:2px solid var(--neon)}
+.cr.tr{top:7px;right:7px;border-top:2px solid var(--neon);border-right:2px solid var(--neon)}
+.cr.bl{bottom:7px;left:7px;border-bottom:2px solid var(--neon);border-left:2px solid var(--neon)}
+.cr.br{bottom:7px;right:7px;border-bottom:2px solid var(--neon);border-right:2px solid var(--neon)}
+.panel{display:flex;flex-direction:column;gap:11px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.card.lit{border-color:var(--border-neon)}
+.lbl{font-size:10px;letter-spacing:1.4px;color:var(--text3);text-transform:uppercase;margin-bottom:8px}
+.big{font-size:36px;font-weight:700;color:var(--neon);text-shadow:var(--neon-glow);min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center;transition:all .12s;word-break:keep-all;line-height:1.2}
+.big.dim{color:var(--text3);text-shadow:none;font-size:22px;font-weight:400}
+.sub{font-size:12px;color:var(--text2);margin-top:7px;min-height:16px;text-align:center}
+.bar-row{margin-top:12px;display:flex;align-items:center;gap:8px}
+.bar-pct{font-size:11px;color:var(--text3);width:26px;text-align:right}
+.bar-track{flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;background:var(--neon);transition:width .18s ease,background .2s;width:0%}
+.sent-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.sent-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.acts{display:flex;gap:5px}
+.ibtn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s}
+.ibtn:hover{background:var(--bg3);color:var(--text)}
+.sent-txt{font-size:17px;font-weight:600;letter-spacing:.2px;min-height:28px;word-break:break-word;line-height:1.5}
+.sent-txt.empty{font-size:12px;color:var(--text3);font-weight:400}
+.tts-row{display:flex;gap:7px;margin-top:10px}
+.tts-btn{flex:1;padding:9px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
+.tts-btn:hover{background:var(--bg3);color:var(--text)}
+.tts-btn.active{border-color:var(--border-neon);color:var(--neon);background:var(--neon-dim)}
+.start-btn{width:100%;padding:13px;border-radius:var(--rs);border:1px solid var(--border-neon);background:var(--neon-dim);color:var(--neon);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;letter-spacing:.3px}
+.start-btn:hover{background:rgba(0,217,126,.22);box-shadow:var(--neon-glow)}
+.start-btn:disabled{opacity:.4;cursor:not-allowed}
+.ref-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;max-height:260px;overflow-y:auto}
+.ref-card::-webkit-scrollbar{width:3px}
+.ref-card::-webkit-scrollbar-track{background:transparent}
+.ref-card::-webkit-scrollbar-thumb{background:var(--border)}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.ri{border:1px solid var(--border);border-radius:7px;padding:7px 5px;text-align:center;background:var(--bg2);cursor:default;transition:all .2s}
+.ri:hover{border-color:var(--border-neon)}
+.ri.hi{border-color:var(--neon);background:var(--neon-dim)}
+.ri-w{font-size:12px;font-weight:600;color:var(--text)}
+.ri-d{font-size:9px;color:var(--text3);margin-top:2px;line-height:1.3}
+.tip{font-size:11px;color:var(--text3);display:flex;gap:5px;align-items:flex-start;padding:9px 11px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg2);line-height:1.5;margin-top:9px}
+.prog-ring{position:absolute;bottom:10px;right:10px;opacity:0;transition:opacity .3s}
+.prog-ring.show{opacity:1}
+svg.ring{transform:rotate(-90deg)}
+circle.track{fill:none;stroke:rgba(255,255,255,.08);stroke-width:3}
+circle.fill{fill:none;stroke:var(--neon);stroke-width:3;stroke-dasharray:63;stroke-dashoffset:63;stroke-linecap:round;transition:stroke-dashoffset .1s linear}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
+<div class="wrap">
+  <div class="hdr">
     <div class="logo">
-      <div class="logo-icon">✋</div>
+      <div class="logo-ico">✋</div>
       <div>
-        <div class="logo-text">SignDetect</div>
-        <div class="logo-sub">Gestur ke Kalimat</div>
+        <div class="logo-name">SignDetect</div>
+        <div class="logo-sub">Bahasa Isyarat → Kalimat + Suara</div>
       </div>
     </div>
-    <div class="status-pill">
-      <div class="dot loading" id="statusDot"></div>
-      <span id="statusText">Siap</span>
-    </div>
+    <div class="pill"><div class="dot ld" id="sDot"></div><span id="sTxt">Siap</span></div>
   </div>
 
-  <div class="main-grid">
+  <div class="grid">
     <div>
-      <div class="cam-card" id="camCard">
-        <video id="videoEl" playsinline autoplay muted></video>
-        <canvas id="canvasEl"></canvas>
-        <div class="corner tl"></div>
-        <div class="corner tr"></div>
-        <div class="corner bl"></div>
-        <div class="corner br"></div>
-        <div class="cam-badge" id="camBadge">
-          <span id="camBadgeDot" style="width:6px;height:6px;border-radius:50%;background:#555;display:inline-block;"></span>
-          <span id="camBadgeText">Kamera belum aktif</span>
-        </div>
-        <div class="cam-overlay" id="camOverlay">
-          <div class="cam-overlay-icon">📷</div>
-          <div class="cam-overlay-text">Klik tombol untuk mulai</div>
+      <div class="cam-wrap" id="camWrap">
+        <video id="vid" playsinline autoplay muted></video>
+        <canvas id="cvs"></canvas>
+        <div class="cr tl"></div><div class="cr tr"></div><div class="cr bl"></div><div class="cr br"></div>
+        <div class="badge" id="badge"><span class="bdot" id="bdot"></span><span id="btxt">Kamera belum aktif</span></div>
+        <div class="over" id="over"><div class="over-ico">📷</div><div class="over-txt">Klik tombol untuk mulai</div></div>
+        <div class="prog-ring" id="progRing">
+          <svg class="ring" width="28" height="28" viewBox="0 0 28 28">
+            <circle class="track" cx="14" cy="14" r="10"/>
+            <circle class="fill" cx="14" cy="14" r="10" id="ringFill"/>
+          </svg>
         </div>
       </div>
-      <div style="margin-top:10px;">
-        <div class="tip">
-          <span class="tip-icon">💡</span>
-          Pastikan pencahayaan cukup dan tangan terlihat jelas. Tahan gestur ~0.8 detik agar terdeteksi sebagai kata.
-        </div>
-      </div>
+      <div class="tip">💡 Tahan gestur ~0.9 detik sampai lingkaran penuh. Pastikan tangan terlihat dari pergelangan. Gunakan pencahayaan yang baik.</div>
     </div>
 
     <div class="panel">
-      <div class="letter-card" id="letterCard">
-        <div class="letter-label">Kata Terdeteksi</div>
-        <div class="letter-big dim" id="bigLetter">—</div>
-        <div class="letter-desc" id="detWord">Belum ada gerakan</div>
-        <div class="conf-wrap">
-          <div class="conf-label" id="confPct">0%</div>
-          <div class="conf-track"><div class="conf-fill" id="confBar"></div></div>
+      <div class="card" id="detCard">
+        <div class="lbl">Kata Terdeteksi</div>
+        <div class="big dim" id="bigW">—</div>
+        <div class="sub" id="subW">Belum ada gerakan</div>
+        <div class="bar-row">
+          <div class="bar-pct" id="bPct">0%</div>
+          <div class="bar-track"><div class="bar-fill" id="bFill"></div></div>
         </div>
       </div>
 
-      <div class="sentence-card">
-        <div class="sentence-top">
-          <div class="sentence-label">Kalimat</div>
-          <div class="sentence-actions">
-            <button class="icon-btn" id="btnDel" title="Hapus kata terakhir">⌫</button>
-            <button class="icon-btn" id="btnClear" title="Reset">✕</button>
+      <div class="sent-card">
+        <div class="sent-top">
+          <div class="lbl" style="margin:0">Kalimat</div>
+          <div class="acts">
+            <button class="ibtn" id="btnSp" title="Ucapkan kalimat">🔊</button>
+            <button class="ibtn" id="btnDel" title="Hapus kata terakhir">⌫</button>
+            <button class="ibtn" id="btnClr" title="Reset">✕</button>
           </div>
         </div>
-        <div class="sentence-text empty" id="sentenceBox">Tunjukkan gestur...</div>
+        <div class="sent-txt empty" id="sentBox">Tunjukkan gestur...</div>
+        <div class="tts-row">
+          <button class="tts-btn active" id="btnAuto" title="Suara otomatis setiap kata">🔊 Auto</button>
+          <button class="tts-btn" id="btnMute" title="Diam">🔇 Diam</button>
+        </div>
       </div>
 
       <button class="start-btn" id="btnCam"><span>▶</span> Mulai Kamera</button>
 
       <div class="ref-card">
-        <div class="ref-card-label">Gestur Didukung</div>
-        <div class="ref-grid" id="refGrid"></div>
+        <div class="lbl">Gestur Didukung</div>
+        <div class="rgrid" id="rg"></div>
       </div>
     </div>
   </div>
@@ -182,302 +158,224 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
 <script>
-const videoEl = document.getElementById('videoEl');
-const canvasEl = document.getElementById('canvasEl');
-const ctx = canvasEl.getContext('2d');
-const bigLetter = document.getElementById('bigLetter');
-const detWord = document.getElementById('detWord');
-const confBar = document.getElementById('confBar');
-const confPct = document.getElementById('confPct');
-const sentenceBox = document.getElementById('sentenceBox');
-const statusDot = document.getElementById('statusDot');
-const statusText = document.getElementById('statusText');
-const camBadge = document.getElementById('camBadge');
-const camBadgeDot = document.getElementById('camBadgeDot');
-const camBadgeText = document.getElementById('camBadgeText');
-const camOverlay = document.getElementById('camOverlay');
-const camCard = document.getElementById('camCard');
-const letterCard = document.getElementById('letterCard');
+const vid=document.getElementById('vid'),cvs=document.getElementById('cvs'),ctx=cvs.getContext('2d');
+const bigW=document.getElementById('bigW'),subW=document.getElementById('subW');
+const bFill=document.getElementById('bFill'),bPct=document.getElementById('bPct');
+const sentBox=document.getElementById('sentBox'),sDot=document.getElementById('sDot'),sTxt=document.getElementById('sTxt');
+const badge=document.getElementById('badge'),bdot=document.getElementById('bdot'),btxt=document.getElementById('btxt');
+const over=document.getElementById('over'),camWrap=document.getElementById('camWrap'),detCard=document.getElementById('detCard');
+const progRing=document.getElementById('progRing'),ringFill=document.getElementById('ringFill');
 
-let sentenceWords = [];
-let lastCommittedGesture = '';
-let lastCommitTime = 0;
-let cameraStarted = false;
+let words=[],lastCommit='',lastCommitT=0,camOn=false,autoSpeak=true;
+let buf=[],holdMs=900,lastHoldPct=0;
 
-let gestureBuffer = [];
-const HOLD_TIME = 800;
-
-const GESTURES = [
-  { id: 'fist',     word: 'Halo',          desc: 'Kepalan tangan' },
-  { id: 'open',     word: 'Sampai jumpa',  desc: 'Telapak terbuka' },
-  { id: 'thumbsup', word: 'Ya / Baik',     desc: 'Jempol ke atas' },
-  { id: 'thumbsdown', word: 'Tidak',       desc: 'Jempol ke bawah' },
-  { id: 'point',    word: 'Kamu',          desc: 'Telunjuk menunjuk' },
-  { id: 'peace',    word: 'Damai',         desc: 'Dua jari (V)' },
-  { id: 'three',    word: 'Tolong',        desc: 'Tiga jari' },
-  { id: 'ok',       word: 'Mengerti',      desc: 'Jari membentuk O' },
-  { id: 'rock',     word: 'Terima kasih',  desc: 'Telunjuk + kelingking' },
-  { id: 'love',     word: 'Aku sayang kamu', desc: 'Jempol+telunjuk+kelingking' },
-  { id: 'callme',   word: 'Hubungi aku',   desc: 'Jempol + kelingking (telepon)' },
+const GESTURES=[
+  {id:'halo',      word:'Halo',           desc:'Kepalan + kibas'},
+  {id:'dada',      word:'Saya',           desc:'Tangan ke dada'},
+  {id:'kamu',      word:'Kamu',           desc:'Telunjuk ke depan (Z-depth)'},
+  {id:'tolong',    word:'Tolong',         desc:'3 jari terbuka'},
+  {id:'terima',    word:'Terima kasih',   desc:'Telunjuk+kelingking (rock)'},
+  {id:'maaf',      word:'Maaf',           desc:'Kepalan memutar'},
+  {id:'ya',        word:'Ya / Baik',      desc:'Jempol ke atas'},
+  {id:'tidak',     word:'Tidak',          desc:'Jempol ke bawah'},
+  {id:'mengerti',  word:'Mengerti',       desc:'OK — ibu+telunjuk O'},
+  {id:'damai',     word:'Damai',          desc:'Dua jari V'},
+  {id:'sayang',    word:'Cinta',          desc:'Jempol+telunjuk+kelingking'},
+  {id:'hubungi',   word:'Hubungi',        desc:'Telepon (jempol+kelingking)'},
+  {id:'sampai',    word:'Sampai jumpa',   desc:'Telapak terbuka lebar'},
+  {id:'tidak_tau', word:'Tidak tahu',     desc:'5 jari buka + goyangan'},
 ];
 
-const refGrid = document.getElementById('refGrid');
-const refItems = {};
-GESTURES.forEach(g => {
-  const el = document.createElement('div');
-  el.className = 'ref-item';
-  el.id = 'ref-' + g.id;
-  el.innerHTML = `<div class="ri-letter">${g.word}</div><div class="ri-desc">${g.desc}</div>`;
-  refGrid.appendChild(el);
-  refItems[g.id] = el;
+const rg=document.getElementById('rg'),riEls={};
+GESTURES.forEach(g=>{
+  const el=document.createElement('div');
+  el.className='ri';el.id='ri-'+g.id;
+  el.innerHTML=`<div class="ri-w">${g.word}</div><div class="ri-d">${g.desc}</div>`;
+  rg.appendChild(el);riEls[g.id]=el;
 });
-function gestureWord(id) {
-  const g = GESTURES.find(x => x.id === id);
-  return g ? g.word : id;
-}
-function setActiveGesture(id) {
-  Object.values(refItems).forEach(el => el.classList.remove('active-gesture'));
-  if (id && refItems[id]) refItems[id].classList.add('active-gesture');
-}
+function setHi(id){Object.values(riEls).forEach(e=>e.classList.remove('hi'));if(id&&riEls[id])riEls[id].classList.add('hi');}
 
-function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y, (a.z||0) - (b.z||0)); }
-function angle(a, b, c) {
-  const v1 = { x: a.x - b.x, y: a.y - b.y };
-  const v2 = { x: c.x - b.x, y: c.y - b.y };
-  const dot = v1.x * v2.x + v1.y * v2.y;
-  const m1 = Math.hypot(v1.x, v1.y);
-  const m2 = Math.hypot(v2.x, v2.y);
-  if (m1 === 0 || m2 === 0) return 0;
-  const cosA = Math.max(-1, Math.min(1, dot / (m1 * m2)));
-  return Math.acos(cosA) * (180 / Math.PI);
-}
-function fingerCurl(lm, mcp, pip, tip) { return angle(lm[mcp], lm[pip], lm[tip]); }
-
-function classifyHand(lm) {
-  const wrist = lm[0];
-  const thumbAngle  = fingerCurl(lm, 2, 3, 4);
-  const indexAngle  = fingerCurl(lm, 5, 6, 8);
-  const middleAngle = fingerCurl(lm, 9, 10, 12);
-  const ringAngle   = fingerCurl(lm, 13, 14, 16);
-  const pinkyAngle  = fingerCurl(lm, 17, 18, 20);
-
-  const idxExt    = indexAngle  > 145;
-  const midExt    = middleAngle > 145;
-  const ringExt   = ringAngle   > 145;
-  const pinkyExt  = pinkyAngle  > 145;
-
-  const palmWidth = dist(lm[5], lm[17]);
-  const thumbSpread = dist(lm[4], lm[5]) / palmWidth;
-  const thumbExt = thumbSpread > 0.55 && thumbAngle > 130;
-
-  const fingersExtCount = [idxExt, midExt, ringExt, pinkyExt].filter(Boolean).length;
-  const indexThumbDist = dist(lm[8], lm[4]) / palmWidth;
-
-  const thumbPointsUp = lm[4].y < wrist.y - 0.08;
-  const thumbPointsDown = lm[4].y > wrist.y + 0.08;
-
-  if (fingersExtCount === 0 && thumbExt && thumbPointsUp) return { id: 'thumbsup', conf: 92 };
-  if (fingersExtCount === 0 && thumbExt && thumbPointsDown) return { id: 'thumbsdown', conf: 90 };
-  if (thumbExt && pinkyExt && !idxExt && !midExt && !ringExt) return { id: 'callme', conf: 86 };
-  if (thumbExt && idxExt && pinkyExt && !midExt && !ringExt) return { id: 'love', conf: 85 };
-  if (idxExt && pinkyExt && !midExt && !ringExt && !thumbExt) return { id: 'rock', conf: 84 };
-  if (indexThumbDist < 0.35 && !midExt && !ringExt && !pinkyExt) return { id: 'ok', conf: 80 };
-  if (idxExt && !midExt && !ringExt && !pinkyExt && !thumbExt) return { id: 'point', conf: 82 };
-  if (idxExt && midExt && !ringExt && !pinkyExt) return { id: 'peace', conf: 87 };
-  if (idxExt && midExt && ringExt && !pinkyExt) return { id: 'three', conf: 85 };
-  if (fingersExtCount === 4) return { id: 'open', conf: 85 };
-  if (fingersExtCount === 0 && !thumbExt) return { id: 'fist', conf: 84 };
-
-  return { id: null, conf: 0 };
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y,(a.z||0)-(b.z||0));}
+function dist2d(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function ang(a,b,c){
+  const v1={x:a.x-b.x,y:a.y-b.y},v2={x:c.x-b.x,y:c.y-b.y};
+  const d=v1.x*v2.x+v1.y*v2.y,m=Math.hypot(v1.x,v1.y)*Math.hypot(v2.x,v2.y);
+  return m?Math.acos(Math.max(-1,Math.min(1,d/m)))*180/Math.PI:0;
 }
 
-const HAND_CONNECTIONS = [
-  [0,1],[1,2],[2,3],[3,4],
-  [0,5],[5,6],[6,7],[7,8],
-  [5,9],[9,10],[10,11],[11,12],
-  [9,13],[13,14],[14,15],[15,16],
-  [13,17],[17,18],[18,19],[19,20],
-  [0,17]
-];
+function isExt(lm,mcp,pip,tip,th=140){return ang(lm[mcp],lm[pip],lm[tip])>th;}
+function isCurled(lm,mcp,pip,tip){return ang(lm[mcp],lm[pip],lm[tip])<100;}
 
-function drawHandSkeleton(lm) {
-  const W = canvasEl.width, H = canvasEl.height;
-  const toXY = p => [p.x * W, p.y * H];
+function classify(lm){
+  const wrist=lm[0];
+  const pw=dist2d(lm[5],lm[17])||0.001;
+
+  const idxExt=isExt(lm,5,6,8);
+  const midExt=isExt(lm,9,10,12);
+  const rinExt=isExt(lm,13,14,16);
+  const pnkExt=isExt(lm,17,18,20);
+
+  const idxCurl=isCurled(lm,5,6,8);
+  const midCurl=isCurled(lm,9,10,12);
+  const rinCurl=isCurled(lm,13,14,16);
+  const pnkCurl=isCurled(lm,17,18,20);
+
+  const thumbSpread=dist2d(lm[4],lm[5])/pw;
+  const thumbExt=thumbSpread>0.55;
+  const thumbUp=lm[4].y<wrist.y-0.1;
+  const thumbDown=lm[4].y>wrist.y+0.12;
+
+  const extCount=[idxExt,midExt,rinExt,pnkExt].filter(Boolean).length;
+  const curlCount=[idxCurl,midCurl,rinCurl,pnkCurl].filter(Boolean).length;
+
+  const itDist=dist2d(lm[8],lm[4])/pw;
+  const palmY=wrist.y;
+
+  const idxTipZ=lm[8].z||0;
+  const wristZ=wrist.z||0;
+  const idxDepth=wristZ-idxTipZ;
+
+  const handAtChest=(lm[9].y>0.45&&lm[9].y<0.85);
+
+  if(extCount===4&&thumbExt)return{id:'sampai',conf:88};
+  if(thumbExt&&thumbUp&&curlCount>=3)return{id:'ya',conf:92};
+  if(thumbExt&&thumbDown&&curlCount>=3)return{id:'tidak',conf:90};
+  if(idxExt&&pnkExt&&!midExt&&!rinExt&&thumbExt)return{id:'sayang',conf:86};
+  if(pnkExt&&thumbExt&&!idxExt&&!midExt&&!rinExt)return{id:'hubungi',conf:85};
+  if(idxExt&&pnkExt&&!midExt&&!rinExt&&!thumbExt)return{id:'terima',conf:84};
+  if(itDist<0.32&&!midExt&&!rinExt&&!pnkExt)return{id:'mengerti',conf:81};
+  if(idxExt&&midExt&&!rinExt&&!pnkExt)return{id:'damai',conf:88};
+  if(idxExt&&midExt&&rinExt&&!pnkExt)return{id:'tolong',conf:85};
+  if(idxExt&&!midExt&&!rinExt&&!pnkExt&&!thumbExt){
+    if(idxDepth>0.06)return{id:'kamu',conf:87};
+    return{id:'kamu',conf:78};
+  }
+  if(curlCount>=3&&!thumbExt&&handAtChest)return{id:'dada',conf:82};
+  if(curlCount>=3&&!thumbExt)return{id:'halo',conf:76};
+  if(extCount===4&&!thumbExt)return{id:'tidak_tau',conf:72};
+
+  return{id:null,conf:0};
+}
+
+const CONN=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+function drawHand(lm){
+  const W=cvs.width,H=cvs.height;
+  const p=p=>([p.x*W,p.y*H]);
   ctx.save();
-  ctx.shadowColor = 'rgba(0,255,136,0.9)';
-  ctx.shadowBlur = 10;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  HAND_CONNECTIONS.forEach(([a, b]) => {
-    const [ax, ay] = toXY(lm[a]);
-    const [bx, by] = toXY(lm[b]);
-    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
-    ctx.strokeStyle = 'rgba(0,255,136,0.35)'; ctx.lineWidth = 4; ctx.stroke();
+  CONN.forEach(([a,b])=>{
+    const [ax,ay]=p(lm[a]),[bx,by]=p(lm[b]);
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);
+    ctx.strokeStyle='rgba(0,217,126,0.32)';ctx.lineWidth=3.5;ctx.lineCap='round';ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);
+    ctx.strokeStyle='rgba(180,255,220,0.85)';ctx.lineWidth=1.2;ctx.stroke();
   });
-
-  ctx.shadowBlur = 0;
-  HAND_CONNECTIONS.forEach(([a, b]) => {
-    const [ax, ay] = toXY(lm[a]);
-    const [bx, by] = toXY(lm[b]);
-    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
-    ctx.strokeStyle = 'rgba(170,255,210,0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
-  });
-
-  lm.forEach((p, i) => {
-    const [x, y] = toXY(p);
-    const isTip = [4,8,12,16,20].includes(i);
-    const isWrist = i === 0;
-    const r = isTip ? 5 : isWrist ? 6 : 3;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.shadowColor = '#00ff88'; ctx.shadowBlur = isTip ? 8 : 4;
-    ctx.fillStyle = isTip ? '#ffffff' : '#00ff88'; ctx.fill();
-    if (isTip) {
-      ctx.shadowBlur = 0;
-      ctx.beginPath(); ctx.arc(x, y, r + 2, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(0,255,136,0.6)'; ctx.lineWidth = 1; ctx.stroke();
-    }
+  lm.forEach((pt,i)=>{
+    const [x,y]=p(pt);
+    const tip=[4,8,12,16,20].includes(i);
+    ctx.beginPath();ctx.arc(x,y,tip?4.5:2.5,0,Math.PI*2);
+    ctx.fillStyle=tip?'#ffffff':'#00d97e';ctx.fill();
   });
   ctx.restore();
 }
 
-function showResult(gestureId, conf) {
-  const word = gestureWord(gestureId);
-  bigLetter.textContent = word;
-  bigLetter.classList.remove('dim');
-  detWord.textContent = conf > 70 ? `Terdeteksi dengan baik` : `Sinyal lemah, tahan posisi`;
-  confBar.style.width = conf + '%';
-  confPct.textContent = Math.round(conf) + '%';
-  confBar.style.background = conf > 75 ? '#00ff88' : conf > 55 ? '#ffb800' : '#ff4466';
-  letterCard.classList.add('detected');
-  setActiveGesture(gestureId);
+function speak(txt){
+  if(!autoSpeak||!txt)return;
+  const utt=new SpeechSynthesisUtterance(txt);
+  utt.lang='id-ID';utt.rate=0.9;utt.pitch=1.05;
+  speechSynthesis.cancel();speechSynthesis.speak(utt);
 }
 
-function showNoHand() {
-  bigLetter.textContent = '—';
-  bigLetter.classList.add('dim');
-  detWord.textContent = 'Arahkan tangan ke kamera';
-  confBar.style.width = '0%';
-  confPct.textContent = '0%';
-  letterCard.classList.remove('detected');
-  setActiveGesture(null);
-  gestureBuffer = [];
+function updSentence(){
+  if(words.length){sentBox.className='sent-txt';sentBox.textContent=words.join(' ');}
+  else{sentBox.className='sent-txt empty';sentBox.textContent='Tunjukkan gestur...';}
 }
 
-function updateSentence() {
-  if (sentenceWords.length) {
-    sentenceBox.className = 'sentence-text';
-    sentenceBox.textContent = sentenceWords.join(' ');
+document.getElementById('btnDel').onclick=()=>{words.pop();updSentence();};
+document.getElementById('btnClr').onclick=()=>{words=[];updSentence();};
+document.getElementById('btnSp').onclick=()=>{
+  const t=words.join(' ');if(t){const u=new SpeechSynthesisUtterance(t);u.lang='id-ID';u.rate=0.88;speechSynthesis.cancel();speechSynthesis.speak(u);}
+};
+document.getElementById('btnAuto').onclick=()=>{autoSpeak=true;document.getElementById('btnAuto').classList.add('active');document.getElementById('btnMute').classList.remove('active');};
+document.getElementById('btnMute').onclick=()=>{autoSpeak=false;document.getElementById('btnMute').classList.add('active');document.getElementById('btnAuto').classList.remove('active');};
+
+function showRes(id,conf,word){
+  bigW.textContent=word;bigW.classList.remove('dim');
+  subW.textContent=conf>75?'Terdeteksi jelas':'Tahan lebih stabil';
+  bFill.style.width=conf+'%';bPct.textContent=Math.round(conf)+'%';
+  bFill.style.background=conf>75?'#00d97e':conf>55?'#f5a623':'#f54269';
+  detCard.classList.add('lit');setHi(id);
+}
+function showNone(){
+  bigW.textContent='—';bigW.classList.add('dim');subW.textContent='Arahkan tangan ke kamera';
+  bFill.style.width='0%';bPct.textContent='0%';detCard.classList.remove('lit');setHi(null);
+  buf=[];ringFill.style.strokeDashoffset='63';progRing.classList.remove('show');lastHoldPct=0;
+}
+
+function processGesture(id,conf,word){
+  if(!id){showNone();subW.textContent='Gestur tidak dikenali';return;}
+  const now=Date.now();
+  buf.push({id,conf,t:now,word});
+  buf=buf.filter(g=>now-g.t<=holdMs+250);
+  const counts={};buf.forEach(g=>{counts[g.id]=(counts[g.id]||0)+1;});
+  let dom=id,mx=0;
+  Object.entries(counts).forEach(([k,v])=>{if(v>mx){mx=v;dom=k;}});
+  const domWord=buf.find(g=>g.id===dom)?.word||word;
+  const oldest=buf.find(g=>g.id===dom);
+  const held=oldest?now-oldest.t:0;
+  const ratio=mx/buf.length;
+  showRes(dom,conf,domWord);
+  const pct=Math.min(100,Math.round(held/holdMs*100));
+  if(ratio>0.65&&conf>62){
+    progRing.classList.add('show');
+    ringFill.style.strokeDashoffset=63*(1-pct/100);
+    lastHoldPct=pct;
   } else {
-    sentenceBox.className = 'sentence-text empty';
-    sentenceBox.textContent = 'Tunjukkan gestur...';
+    progRing.classList.remove('show');
+    ringFill.style.strokeDashoffset='63';
+  }
+  if(ratio>0.65&&held>=holdMs&&conf>62&&(dom!==lastCommit||now-lastCommitT>1800)){
+    words.push(domWord);updSentence();speak(domWord);
+    lastCommit=dom;lastCommitT=now;buf=[];
+    ringFill.style.strokeDashoffset='63';
   }
 }
 
-document.getElementById('btnDel').onclick = () => { sentenceWords.pop(); updateSentence(); };
-document.getElementById('btnClear').onclick = () => { sentenceWords = []; updateSentence(); };
+document.getElementById('btnCam').onclick=async()=>{
+  if(camOn)return;camOn=true;
+  const btn=document.getElementById('btnCam');
+  btn.disabled=true;btn.textContent='⏳  Memuat...';
+  sDot.className='dot ld';sTxt.textContent='Memuat AI...';
 
-function processGesture(gestureId, conf) {
-  if (!gestureId) {
-    showNoHand();
-    detWord.textContent = 'Gestur tidak dikenali';
-    return;
-  }
+  const hands=new Hands({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${f}`});
+  hands.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:0.72,minTrackingConfidence:0.65});
 
-  const now = Date.now();
-  gestureBuffer.push({ id: gestureId, conf, t: now });
-  gestureBuffer = gestureBuffer.filter(g => now - g.t <= HOLD_TIME + 200);
+  const gWord=id=>GESTURES.find(g=>g.id===id)?.word||id;
 
-  const counts = {};
-  gestureBuffer.forEach(g => { counts[g.id] = (counts[g.id] || 0) + 1; });
-  let dominant = gestureId, maxCount = 0;
-  Object.entries(counts).forEach(([k, v]) => { if (v > maxCount) { maxCount = v; dominant = k; } });
-
-  const oldestForDominant = gestureBuffer.find(g => g.id === dominant);
-  const heldDuration = oldestForDominant ? now - oldestForDominant.t : 0;
-  const stableRatio = maxCount / gestureBuffer.length;
-
-  showResult(dominant, conf);
-
-  if (
-    conf > 65 &&
-    stableRatio > 0.7 &&
-    heldDuration >= HOLD_TIME &&
-    (dominant !== lastCommittedGesture || now - lastCommitTime > 1600)
-  ) {
-    sentenceWords.push(gestureWord(dominant));
-    updateSentence();
-    lastCommittedGesture = dominant;
-    lastCommitTime = now;
-    gestureBuffer = [];
-  }
-}
-
-document.getElementById('btnCam').onclick = async () => {
-  if (cameraStarted) return;
-  cameraStarted = true;
-  const btn = document.getElementById('btnCam');
-  btn.disabled = true;
-  btn.textContent = '⏳  Memuat...';
-  statusDot.className = 'dot loading';
-  statusText.textContent = 'Memuat AI...';
-
-  const hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${f}` });
-  hands.setOptions({
-    maxNumHands: 1,
-    modelComplexity: 1,
-    minDetectionConfidence: 0.7,
-    minTrackingConfidence: 0.6
-  });
-
-  hands.onResults(results => {
-    canvasEl.width = videoEl.videoWidth || 640;
-    canvasEl.height = videoEl.videoHeight || 480;
-    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-
-    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-      const lm = results.multiHandLandmarks[0];
-      drawHandSkeleton(lm);
-      const res = classifyHand(lm);
-      processGesture(res.id, res.conf);
-      camBadge.className = 'cam-badge hand';
-      camBadgeDot.style.background = '#00ff88';
-      camBadgeDot.style.boxShadow = '0 0 6px #00ff88';
-      camBadgeText.textContent = '✋ Tangan terdeteksi';
+  hands.onResults(r=>{
+    cvs.width=vid.videoWidth||640;cvs.height=vid.videoHeight||480;
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    if(r.multiHandLandmarks?.length){
+      const lm=r.multiHandLandmarks[0];
+      drawHand(lm);
+      const res=classify(lm);
+      processGesture(res.id,res.conf,res.id?gWord(res.id):null);
+      badge.className='cam-badge hand';bdot.style.background='#00d97e';bdot.style.boxShadow='0 0 5px #00d97e';btxt.textContent='✋ Tangan terdeteksi';
     } else {
-      showNoHand();
-      camBadge.className = 'cam-badge';
-      camBadgeDot.style.background = '#555';
-      camBadgeDot.style.boxShadow = 'none';
-      camBadgeText.textContent = 'Mencari tangan...';
+      showNone();badge.className='badge';bdot.style.background='#444';bdot.style.boxShadow='none';btxt.textContent='Mencari tangan...';
     }
   });
 
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: 640, height: 480 }
-    });
-    videoEl.srcObject = stream;
-    await new Promise(r => videoEl.onloadedmetadata = r);
-    videoEl.play();
-    camOverlay.classList.add('hidden');
-    camCard.classList.add('active');
-    statusDot.className = 'dot active';
-    statusText.textContent = 'Live';
-    btn.textContent = '● Kamera Aktif';
-
-    const camera = new Camera(videoEl, {
-      onFrame: async () => { await hands.send({ image: videoEl }); },
-      width: 640, height: 480
-    });
-    camera.start();
-  } catch(e) {
-    cameraStarted = false;
-    btn.disabled = false;
-    btn.innerHTML = '<span>▶</span> Mulai Kamera';
-    statusDot.className = 'dot';
-    statusText.textContent = 'Error kamera';
-    camBadgeText.textContent = 'Akses kamera ditolak';
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480}});
+    vid.srcObject=stream;
+    await new Promise(r=>vid.onloadedmetadata=r);vid.play();
+    over.classList.add('gone');camWrap.classList.add('live');
+    sDot.className='dot ok';sTxt.textContent='Live';btn.textContent='● Kamera Aktif';
+    const cam=new Camera(vid,{onFrame:async()=>{await hands.send({image:vid});},width:640,height:480});
+    cam.start();
+  }catch(e){
+    camOn=false;btn.disabled=false;btn.innerHTML='<span>▶</span> Mulai Kamera';
+    sDot.className='dot';sTxt.textContent='Error';btxt.textContent='Akses kamera ditolak';
   }
 };
 </script>
