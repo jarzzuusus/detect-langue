@@ -210,22 +210,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js"></script>
 
 <script>
-const GESTURES=[
-  {id:'halo',word:'Halo',arti:'Salam atau sapaan',cara:'Buat kepalan tangan atau kibas',emoji:'👋'},
-  {id:'saya',word:'Saya',arti:'Mengacu pada diri sendiri',cara:'Kepalan di dada',emoji:'👆'},
-  {id:'kamu',word:'Kamu',arti:'Mengacu pada orang lain',cara:'Telunjuk menunjuk ke depan',emoji:'☝️'},
-  {id:'tolong',word:'Tolong',arti:'Meminta pertolongan',cara:'3 jari terbuka',emoji:'🤲'},
-  {id:'terima_kasih',word:'Terima kasih',arti:'Ungkapan rasa terima kasih',cara:'Rock sign (telunjuk+kelingking)',emoji:'🤘'},
-  {id:'ya',word:'Ya',arti:'Pernyataan setuju',cara:'Jempol ke atas',emoji:'👍'},
-  {id:'tidak',word:'Tidak',arti:'Pernyataan tidak setuju',cara:'Jempol ke bawah',emoji:'👎'},
-  {id:'mengerti',word:'Mengerti',arti:'Paham atau setuju',cara:'Bentuk O dengan ibu jari dan telunjuk',emoji:'👌'},
-  {id:'damai',word:'Damai',arti:'Perdamaian atau V untuk kemenangan',cara:'Dua jari membentuk V',emoji:'✌️'},
-  {id:'cinta',word:'Cinta',arti:'Ungkapan kasih sayang',cara:'ILY hand sign',emoji:'🤟'},
-  {id:'hubungi',word:'Hubungi',arti:'Permintaan menghubungi',cara:'Bentuk telepon',emoji:'☎️'},
-  {id:'sampai_jumpa',word:'Sampai jumpa',arti:'Salam perpisahan',cara:'Semua 5 jari terbuka',emoji:'👋'},
-  {id:'tidak_tahu',word:'Tidak tahu',arti:'Tidak mengetahui',cara:'Semua jari menyebar',emoji:'🤷'},
-  {id:'maaf',word:'Maaf',arti:'Permohonan maaf',cara:'Kepalan di dada dengan gerakan memutar',emoji:'🙏'},
-];
+const GESTURES=[];
 
 let customGestures=JSON.parse(localStorage.getItem('customGestures'))||[];
 let allGestures=[...GESTURES,...customGestures];
@@ -339,52 +324,7 @@ function compare(v1,v2){
   return Math.max(0,Math.min(100,conf));
 }
 
-function classify(lm){
-  const f={
-    thumb:{ext:isExt(lm,2,3,4),curl:isCurl(lm,2,3,4)},
-    index:{ext:isExt(lm,5,6,8),curl:isCurl(lm,5,6,8)},
-    middle:{ext:isExt(lm,9,10,12),curl:isCurl(lm,9,10,12)},
-    ring:{ext:isExt(lm,13,14,16),curl:isCurl(lm,13,14,16)},
-    pinky:{ext:isExt(lm,17,18,20),curl:isCurl(lm,17,18,20)}
-  };
-  const w=lm[0];
-  const pw=dist2d(lm[5],lm[17])||0.001;
-  const ext=[f.index.ext,f.middle.ext,f.ring.ext,f.pinky.ext].filter(Boolean).length;
-  const curl=[f.index.curl,f.middle.curl,f.ring.curl,f.pinky.curl].filter(Boolean).length;
-  const thumbUp=lm[4].y<w.y-0.1;
-  const thumbDn=lm[4].y>w.y+0.1;
-  const palmY=(lm[9].y+w.y)/2;
-  const tipD=dist2d(lm[8],lm[4])/pw;
-  const idxZ=(w.z||0)-(lm[8].z||0);
-  
-  if(f.index.ext&&f.pinky.ext&&f.middle.curl&&f.ring.curl&&!f.thumb.ext)
-    return{id:'terima_kasih',conf:88};
-  if(f.index.ext&&f.middle.ext&&!f.ring.ext&&!f.pinky.ext&&!f.thumb.ext)
-    return{id:'damai',conf:87};
-  if(f.thumb.ext&&f.index.ext&&f.pinky.ext&&f.middle.curl&&f.ring.curl)
-    return{id:'cinta',conf:86};
-  if(tipD<0.35&&ext<=2)
-    return{id:'mengerti',conf:82};
-  if(f.thumb.ext&&curl>=3&&thumbUp)
-    return{id:'ya',conf:88};
-  if(f.thumb.ext&&curl>=3&&thumbDn)
-    return{id:'tidak',conf:87};
-  if(f.index.ext&&f.middle.ext&&f.ring.ext&&!f.pinky.ext&&!f.thumb.ext)
-    return{id:'tolong',conf:85};
-  if(f.index.ext&&!f.middle.ext&&!f.ring.ext&&!f.pinky.ext&&!f.thumb.ext&&idxZ>0.02)
-    return{id:'kamu',conf:86};
-  if(ext===4&&!f.thumb.ext)
-    return{id:'sampai_jumpa',conf:85};
-  if(curl>=3&&!f.thumb.ext){
-    if(palmY>0.5)return{id:'saya',conf:83};
-    return{id:'maaf',conf:80};
-  }
-  if((ext>=2||curl>=2)&&!f.thumb.ext)
-    return{id:'halo',conf:75};
-  if(ext===4&&f.thumb.ext)
-    return{id:'tidak_tahu',conf:78};
-  return{id:null,conf:0};
-}
+
 
 const CONN=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
 function drawHand(lm){
@@ -448,12 +388,9 @@ function processFrame(lm){
   }
   
   let best={id:null,conf:0};
-  const rule=classify(lm);
-  best=rule;
-  
+  const v=getHandVector(lm);
   for(const cg of customGestures){
     if(cg.vector){
-      const v=getHandVector(lm);
       const conf=compare(v,cg.vector);
       if(conf>best.conf){
         best={id:cg.id,conf};
