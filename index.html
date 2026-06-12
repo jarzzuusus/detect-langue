@@ -230,12 +230,13 @@ const GESTURES=[
 let customGestures=JSON.parse(localStorage.getItem('customGestures'))||[];
 let allGestures=[...GESTURES,...customGestures];
 
-const riEls={};
+// FIX: was "const riEls={}" which caused a crash when renderGestures() tried to reassign it
+let riEls={};
 const rg=document.getElementById('rg');
 
 function renderGestures(){
   rg.innerHTML='';
-  riEls={};
+  riEls={};  // This reassignment now works because riEls is declared with "let"
   allGestures.forEach(g=>{
     const el=document.createElement('div');
     el.className='ri'+(g.custom?' custom':'');
@@ -571,3 +572,9 @@ document.getElementById('btnCam').addEventListener('click',async function(){
     setTimeout(()=>errToast.classList.remove('show'),4000);
   }
 });
+
+// Initialize gesture list on page load
+renderGestures();
+</script>
+</body>
+</html>
