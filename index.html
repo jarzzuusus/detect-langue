@@ -1,4 +1,3 @@
-cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -35,7 +34,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
     overflow-x: hidden;
   }
 
-  /* Background grid */
   body::before {
     content: '';
     position: fixed;
@@ -56,7 +54,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
     z-index: 1;
   }
 
-  /* Header */
   .header {
     display: flex;
     align-items: center;
@@ -95,7 +92,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
   .dot.loading { background: var(--amber); animation: blink 1s infinite; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* Main layout */
   .main-grid {
     display: grid;
     grid-template-columns: 1fr 320px;
@@ -106,7 +102,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
     .main-grid { grid-template-columns: 1fr; }
   }
 
-  /* Camera card */
   .cam-card {
     border-radius: var(--radius);
     overflow: hidden;
@@ -139,7 +134,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
   .cam-overlay-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
   .cam-overlay-text { font-size: 14px; color: var(--text2); }
 
-  /* Top badge on cam */
   .cam-badge {
     position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,0.7);
@@ -154,17 +148,14 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
   }
   .cam-badge.hand { border-color: var(--border-neon); color: var(--neon); }
 
-  /* Corner indicators */
   .corner { position: absolute; width: 20px; height: 20px; opacity: 0.4; }
   .corner.tl { top: 8px; left: 8px; border-top: 2px solid var(--neon); border-left: 2px solid var(--neon); }
   .corner.tr { top: 8px; right: 8px; border-top: 2px solid var(--neon); border-right: 2px solid var(--neon); }
   .corner.bl { bottom: 8px; left: 8px; border-bottom: 2px solid var(--neon); border-left: 2px solid var(--neon); }
   .corner.br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--neon); border-right: 2px solid var(--neon); }
 
-  /* Right panel */
   .panel { display: flex; flex-direction: column; gap: 12px; }
 
-  /* Big letter display */
   .letter-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -194,7 +185,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
   .letter-big.dim { color: var(--text3); text-shadow: none; }
   .letter-desc { font-size: 13px; color: var(--text2); margin-top: 8px; min-height: 18px; }
 
-  /* Confidence bar */
   .conf-wrap {
     margin-top: 14px;
     display: flex; align-items: center; gap: 10px;
@@ -212,7 +202,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
     width: 0%;
   }
 
-  /* Sentence card */
   .sentence-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -246,7 +235,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
   }
   .sentence-text.empty { font-size: 13px; color: var(--text3); letter-spacing: 0; font-weight: 400; }
 
-  /* Start button */
   .start-btn {
     width: 100%;
     padding: 14px;
@@ -263,7 +251,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
   .start-btn:hover { background: rgba(0,255,136,0.25); box-shadow: var(--neon-glow); }
   .start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* Space btn */
   .space-btn {
     width: 100%;
     padding: 10px;
@@ -278,7 +265,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
   }
   .space-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
 
-  /* Gesture ref */
   .ref-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -305,7 +291,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
   .ri-letter { font-size: 18px; font-weight: 700; color: var(--text); }
   .ri-desc { font-size: 8px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
 
-  /* Tips */
   .tip {
     font-size: 11px; color: var(--text3);
     display: flex; gap: 6px; align-items: flex-start;
@@ -321,7 +306,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
 <body>
 <div class="container">
 
-  <!-- Header -->
   <div class="header">
     <div class="logo">
       <div class="logo-icon">✋</div>
@@ -336,16 +320,13 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
     </div>
   </div>
 
-  <!-- Main grid -->
   <div class="main-grid">
 
-    <!-- Camera -->
     <div>
       <div class="cam-card" id="camCard">
         <video id="videoEl" playsinline autoplay muted></video>
         <canvas id="canvasEl"></canvas>
 
-        <!-- Corners -->
         <div class="corner tl"></div>
         <div class="corner tr"></div>
         <div class="corner bl"></div>
@@ -365,15 +346,13 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
       <div style="margin-top:10px;">
         <div class="tip">
           <span class="tip-icon">💡</span>
-          Pastikan pencahayaan cukup dan tangan terlihat jelas. Tahan gestur ~1 detik agar terdeteksi.
+          Pastikan pencahayaan cukup dan tangan terlihat jelas. Tahan gestur ~0.7 detik agar terdeteksi.
         </div>
       </div>
     </div>
 
-    <!-- Right panel -->
     <div class="panel">
 
-      <!-- Letter display -->
       <div class="letter-card" id="letterCard">
         <div class="letter-label">Huruf Terdeteksi</div>
         <div class="letter-big dim" id="bigLetter">—</div>
@@ -386,7 +365,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
         </div>
       </div>
 
-      <!-- Sentence -->
       <div class="sentence-card">
         <div class="sentence-top">
           <div class="sentence-label">Kalimat</div>
@@ -399,12 +377,10 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
         <button class="space-btn" id="btnSpace" style="margin-top:10px;">⎵ &nbsp; Tambah Spasi</button>
       </div>
 
-      <!-- Start button -->
       <button class="start-btn" id="btnCam">
         <span>▶</span> Mulai Kamera
       </button>
 
-      <!-- Gesture ref -->
       <div class="ref-card">
         <div class="ref-card-label">Gestur Didukung</div>
         <div class="ref-grid" id="refGrid"></div>
@@ -416,7 +392,6 @@ cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1675466862/drawing_utils.js" crossorigin="anonymous"></script>
 <script>
 const videoEl = document.getElementById('videoEl');
 const canvasEl = document.getElementById('canvasEl');
@@ -436,10 +411,14 @@ const camCard = document.getElementById('camCard');
 const letterCard = document.getElementById('letterCard');
 
 let sentence = '';
-let lastLetter = '';
-let lastLetterTime = 0;
+let lastCommittedLetter = '';
+let lastCommitTime = 0;
 let cameraStarted = false;
-let currentGesture = null;
+
+// Buffer for temporal smoothing - need same gesture for several frames
+let gestureBuffer = [];
+const BUFFER_SIZE = 6;
+const HOLD_TIME = 700; // ms gesture must be stable before being typed
 
 const GESTURES = [
   { letter: 'A', desc: 'kepalan' },
@@ -472,104 +451,176 @@ function setActiveGesture(letter) {
   if (letter && refItems[letter]) refItems[letter].classList.add('active-gesture');
 }
 
-function isExtended(tip, pip, wrist) {
-  return tip.y < pip.y && tip.y < wrist.y;
-}
-function dist2D(a, b) {
-  return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
-}
-function classifyHand(lm) {
-  const wrist = lm[0];
-  const thumbTip = lm[4], thumbMCP = lm[2];
-  const indexTip = lm[8], indexPIP = lm[6];
-  const middleTip = lm[12], middlePIP = lm[10];
-  const ringTip = lm[16], ringPIP = lm[14];
-  const pinkyTip = lm[20], pinkyPIP = lm[18];
-  const idxExt = isExtended(indexTip, indexPIP, wrist);
-  const midExt = isExtended(middleTip, middlePIP, wrist);
-  const ringExt = isExtended(ringTip, ringPIP, wrist);
-  const pinkyExt = isExtended(pinkyTip, pinkyPIP, wrist);
-  const thumbExt = thumbTip.x < thumbMCP.x;
-  const thumbUp = thumbTip.y < lm[3].y && !idxExt && !midExt && !ringExt && !pinkyExt;
-  const fingersUp = [idxExt, midExt, ringExt, pinkyExt].filter(Boolean).length;
-  const indexThumbClose = dist2D(indexTip, thumbTip) < 0.07;
-  if (thumbUp && thumbTip.y < lm[1].y - 0.08) return { letter: '👍', conf: 90 };
-  if (pinkyExt && thumbExt && !idxExt && !midExt && !ringExt) return { letter: '🤙', conf: 88 };
-  if (idxExt && !midExt && !ringExt && !pinkyExt) {
-    if (thumbExt) return { letter: 'L', conf: 85 };
-    return { letter: 'G', conf: 80 };
-  }
-  if (idxExt && midExt && !ringExt && !pinkyExt) return { letter: 'V', conf: 87 };
-  if (idxExt && midExt && ringExt && !pinkyExt) return { letter: 'W', conf: 85 };
-  if (fingersUp === 4 && !thumbExt) return { letter: 'B', conf: 82 };
-  if (fingersUp === 0 && !thumbExt) return { letter: 'A', conf: 80 };
-  if (indexThumbClose && fingersUp <= 1) return { letter: 'O', conf: 78 };
-  if (thumbExt && !idxExt && !midExt && !ringExt && pinkyExt) return { letter: 'Y', conf: 84 };
-  if (fingersUp >= 3) return { letter: 'C', conf: 60 };
-  return { letter: 'D', conf: 50 };
+// ---------- Geometry helpers ----------
+function dist(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y, (a.z||0) - (b.z||0));
 }
 
-// Custom neon skeleton drawing
+// Angle (in degrees) at point b, formed by a-b-c
+function angle(a, b, c) {
+  const v1 = { x: a.x - b.x, y: a.y - b.y };
+  const v2 = { x: c.x - b.x, y: c.y - b.y };
+  const dot = v1.x * v2.x + v1.y * v2.y;
+  const m1 = Math.hypot(v1.x, v1.y);
+  const m2 = Math.hypot(v2.x, v2.y);
+  if (m1 === 0 || m2 === 0) return 0;
+  const cos = Math.max(-1, Math.min(1, dot / (m1 * m2)));
+  return Math.acos(cos) * (180 / Math.PI);
+}
+
+// Returns true if a finger is "curled" (bent), based on the angle at its PIP joint.
+// Straight finger -> angle near 180. Curled finger -> angle drops well below 160.
+function fingerCurl(lm, mcp, pip, tip) {
+  return angle(lm[mcp], lm[pip], lm[tip]);
+}
+
+// Robust hand classifier using joint angles + relative distances
+function classifyHand(lm) {
+  const wrist = lm[0];
+
+  // Curl angle per finger (lower = more curled/closed)
+  const thumbAngle  = fingerCurl(lm, 2, 3, 4);
+  const indexAngle  = fingerCurl(lm, 5, 6, 8);
+  const middleAngle = fingerCurl(lm, 9, 10, 12);
+  const ringAngle   = fingerCurl(lm, 13, 14, 16);
+  const pinkyAngle  = fingerCurl(lm, 17, 18, 20);
+
+  // Extension flags - tuned thresholds, more tolerant than tip/pip.y comparisons
+  const idxExt    = indexAngle  > 145;
+  const midExt    = middleAngle > 145;
+  const ringExt   = ringAngle   > 145;
+  const pinkyExt  = pinkyAngle  > 145;
+
+  // Thumb extension based on distance from palm (handles both rotations)
+  const palmWidth = dist(lm[5], lm[17]); // reference scale
+  const thumbSpread = dist(lm[4], lm[5]) / palmWidth;
+  const thumbExt = thumbSpread > 0.55 && thumbAngle > 130;
+
+  const fingersExtCount = [idxExt, midExt, ringExt, pinkyExt].filter(Boolean).length;
+  const indexThumbDist = dist(lm[8], lm[4]) / palmWidth;
+
+  // Thumbs up: thumb extended upward, all other fingers curled, thumb tip clearly above wrist
+  const thumbPointsUp = lm[4].y < wrist.y - 0.08;
+  if (fingersExtCount === 0 && thumbExt && thumbPointsUp) {
+    return { letter: '👍', conf: 92 };
+  }
+
+  // Hang loose: thumb + pinky extended, others curled
+  if (thumbExt && pinkyExt && !idxExt && !midExt && !ringExt) {
+    return { letter: '🤙', conf: 88 };
+  }
+
+  // O: index and thumb tips touching, forming ring, other fingers can be curled or relaxed
+  if (indexThumbDist < 0.35 && !midExt && !ringExt && !pinkyExt) {
+    return { letter: 'O', conf: 80 };
+  }
+
+  // One finger (index) extended
+  if (idxExt && !midExt && !ringExt && !pinkyExt) {
+    return thumbExt ? { letter: 'L', conf: 86 } : { letter: 'G', conf: 82 };
+  }
+
+  // Two fingers (index + middle) extended -> V
+  if (idxExt && midExt && !ringExt && !pinkyExt) {
+    return { letter: 'V', conf: 88 };
+  }
+
+  // Three fingers (index, middle, ring) extended -> W
+  if (idxExt && midExt && ringExt && !pinkyExt) {
+    return { letter: 'W', conf: 86 };
+  }
+
+  // Y: thumb + pinky extended, index/middle/ring curled (without requiring strict pinky check above)
+  if (thumbExt && pinkyExt && !idxExt && !midExt) {
+    return { letter: 'Y', conf: 84 };
+  }
+
+  // All four fingers extended, thumb tucked -> B
+  if (fingersExtCount === 4 && !thumbExt) {
+    return { letter: 'B', conf: 85 };
+  }
+
+  // All fingers curled, thumb tucked -> A (fist)
+  if (fingersExtCount === 0 && !thumbExt) {
+    return { letter: 'A', conf: 84 };
+  }
+
+  // Curved hand, fingers partially bent -> C
+  const avgCurl = (indexAngle + middleAngle + ringAngle + pinkyAngle) / 4;
+  if (avgCurl > 90 && avgCurl < 145 && fingersExtCount <= 2) {
+    return { letter: 'C', conf: 65 };
+  }
+
+  // Fallback - lower confidence catch-all
+  return { letter: 'D', conf: 45 };
+}
+
+// ---------- Skeleton drawing (smoother / more natural) ----------
+const HAND_CONNECTIONS = [
+  [0,1],[1,2],[2,3],[3,4],
+  [0,5],[5,6],[6,7],[7,8],
+  [5,9],[9,10],[10,11],[11,12],
+  [9,13],[13,14],[14,15],[15,16],
+  [13,17],[17,18],[18,19],[19,20],
+  [0,17]
+];
+
 function drawHandSkeleton(lm) {
   const W = canvasEl.width, H = canvasEl.height;
   const toXY = p => [p.x * W, p.y * H];
 
-  const connections = [
-    // Thumb
-    [0,1],[1,2],[2,3],[3,4],
-    // Index
-    [0,5],[5,6],[6,7],[7,8],
-    // Middle
-    [0,9],[9,10],[10,11],[11,12],
-    // Ring
-    [0,13],[13,14],[14,15],[15,16],
-    // Pinky
-    [0,17],[17,18],[18,19],[19,20],
-    // Palm
-    [5,9],[9,13],[13,17]
-  ];
-
   ctx.save();
-  // Draw connections with neon glow
-  connections.forEach(([a, b]) => {
+
+  // Soft glow pass (drawn first, blurred, low opacity)
+  ctx.shadowColor = 'rgba(0,255,136,0.9)';
+  ctx.shadowBlur = 10;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  HAND_CONNECTIONS.forEach(([a, b]) => {
     const [ax, ay] = toXY(lm[a]);
     const [bx, by] = toXY(lm[b]);
     ctx.beginPath();
     ctx.moveTo(ax, ay);
     ctx.lineTo(bx, by);
-    ctx.strokeStyle = 'rgba(0,255,136,0.5)';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.shadowColor = '#00ff88';
-    ctx.shadowBlur = 8;
-    ctx.stroke();
-    // Bright core line
-    ctx.beginPath();
-    ctx.moveTo(ax, ay);
-    ctx.lineTo(bx, by);
-    ctx.strokeStyle = 'rgba(0,255,136,1)';
-    ctx.lineWidth = 1;
-    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(0,255,136,0.35)';
+    ctx.lineWidth = 4;
     ctx.stroke();
   });
 
-  // Draw landmark dots
+  // Crisp core lines, no shadow (drawn on top for clarity)
+  ctx.shadowBlur = 0;
+  HAND_CONNECTIONS.forEach(([a, b]) => {
+    const [ax, ay] = toXY(lm[a]);
+    const [bx, by] = toXY(lm[b]);
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.strokeStyle = 'rgba(170,255,210,0.9)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  // Joints
   lm.forEach((p, i) => {
     const [x, y] = toXY(p);
     const isTip = [4,8,12,16,20].includes(i);
     const isWrist = i === 0;
+    const r = isTip ? 5 : isWrist ? 6 : 3;
+
     ctx.beginPath();
-    ctx.arc(x, y, isTip ? 5 : isWrist ? 6 : 3.5, 0, Math.PI * 2);
-    ctx.fillStyle = isTip ? '#fff' : '#00ff88';
+    ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.shadowColor = '#00ff88';
-    ctx.shadowBlur = isTip ? 12 : 6;
+    ctx.shadowBlur = isTip ? 8 : 4;
+    ctx.fillStyle = isTip ? '#ffffff' : '#00ff88';
     ctx.fill();
+
     if (isTip) {
-      ctx.beginPath();
-      ctx.arc(x, y, 5, 0, Math.PI * 2);
-      ctx.strokeStyle = '#00ff88';
-      ctx.lineWidth = 1.5;
       ctx.shadowBlur = 0;
+      ctx.beginPath();
+      ctx.arc(x, y, r + 2, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0,255,136,0.6)';
+      ctx.lineWidth = 1;
       ctx.stroke();
     }
   });
@@ -577,27 +628,16 @@ function drawHandSkeleton(lm) {
   ctx.restore();
 }
 
-function showResult(letter, conf) {
+// ---------- UI updates ----------
+function showResult(letter, conf, stableProgress) {
   bigLetter.textContent = letter;
   bigLetter.classList.remove('dim');
-  detWord.textContent = conf > 70 ? `Terdeteksi dengan baik` : `Sinyal lemah`;
+  detWord.textContent = conf > 70 ? `Terdeteksi dengan baik` : `Sinyal lemah, tahan posisi`;
   confBar.style.width = conf + '%';
   confPct.textContent = Math.round(conf) + '%';
   confBar.style.background = conf > 75 ? '#00ff88' : conf > 55 ? '#ffb800' : '#ff4466';
   letterCard.classList.add('detected');
   setActiveGesture(letter);
-
-  const now = Date.now();
-  if (letter !== lastLetter || now - lastLetterTime > 2000) {
-    if (conf > 70 && now - lastLetterTime > 900) {
-      if (!['👍','🤙'].includes(letter)) {
-        sentence += letter;
-        updateSentence();
-      }
-      lastLetter = letter;
-      lastLetterTime = now;
-    }
-  }
 }
 
 function showNoHand() {
@@ -608,6 +648,7 @@ function showNoHand() {
   confPct.textContent = '0%';
   letterCard.classList.remove('detected');
   setActiveGesture(null);
+  gestureBuffer = [];
 }
 
 function updateSentence() {
@@ -624,6 +665,42 @@ document.getElementById('btnSpace').onclick = () => { sentence += ' '; updateSen
 document.getElementById('btnDel').onclick = () => { sentence = sentence.slice(0,-1); updateSentence(); };
 document.getElementById('btnClear').onclick = () => { sentence = ''; updateSentence(); };
 
+// ---------- Temporal smoothing / typing logic ----------
+function processGesture(letter, conf) {
+  const now = Date.now();
+  gestureBuffer.push({ letter, conf, t: now });
+  // keep only recent entries
+  gestureBuffer = gestureBuffer.filter(g => now - g.t <= HOLD_TIME + 200);
+
+  // majority vote over the buffer window
+  const counts = {};
+  gestureBuffer.forEach(g => { counts[g.letter] = (counts[g.letter] || 0) + 1; });
+  let dominant = letter, maxCount = 0;
+  Object.entries(counts).forEach(([k, v]) => { if (v > maxCount) { maxCount = v; dominant = k; } });
+
+  const oldestForDominant = gestureBuffer.find(g => g.letter === dominant);
+  const heldDuration = oldestForDominant ? now - oldestForDominant.t : 0;
+  const stableRatio = maxCount / gestureBuffer.length;
+
+  showResult(dominant, conf);
+
+  // Commit to sentence only if dominant gesture has been stable long enough,
+  // confidence is decent, and it's a new letter (or enough time passed since last commit)
+  if (
+    conf > 65 &&
+    stableRatio > 0.7 &&
+    heldDuration >= HOLD_TIME &&
+    !['👍','🤙'].includes(dominant) &&
+    (dominant !== lastCommittedLetter || now - lastCommitTime > 1400)
+  ) {
+    sentence += dominant;
+    updateSentence();
+    lastCommittedLetter = dominant;
+    lastCommitTime = now;
+    gestureBuffer = []; // reset so the same letter requires a fresh hold to repeat
+  }
+}
+
 document.getElementById('btnCam').onclick = async () => {
   if (cameraStarted) return;
   cameraStarted = true;
@@ -634,16 +711,24 @@ document.getElementById('btnCam').onclick = async () => {
   statusText.textContent = 'Memuat AI...';
 
   const hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${f}` });
-  hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
+  hands.setOptions({
+    maxNumHands: 1,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.7,
+    minTrackingConfidence: 0.6
+  });
+
   hands.onResults(results => {
     canvasEl.width = videoEl.videoWidth || 640;
     canvasEl.height = videoEl.videoHeight || 480;
     ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       const lm = results.multiHandLandmarks[0];
       drawHandSkeleton(lm);
       const res = classifyHand(lm);
-      showResult(res.letter, res.conf);
+      processGesture(res.letter, res.conf);
+
       camBadge.className = 'cam-badge hand';
       camBadgeDot.style.background = '#00ff88';
       camBadgeDot.style.boxShadow = '0 0 6px #00ff88';
@@ -687,5 +772,3 @@ document.getElementById('btnCam').onclick = async () => {
 </script>
 </body>
 </html>
-HTMLEOF
-echo "Done"
