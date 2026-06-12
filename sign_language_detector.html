@@ -1,0 +1,691 @@
+cat > /mnt/user-data/outputs/sign-detector.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deteksi Bahasa Isyarat</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --neon: #00ff88;
+    --neon-dim: rgba(0,255,136,0.15);
+    --neon-glow: 0 0 12px rgba(0,255,136,0.6);
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --card: #16161f;
+    --border: rgba(255,255,255,0.08);
+    --border-neon: rgba(0,255,136,0.3);
+    --text: #f0f0f8;
+    --text2: #8888aa;
+    --text3: #555570;
+    --amber: #ffb800;
+    --red: #ff4466;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--neon-dim);
+    border: 1px solid var(--border-neon);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
+  .status-pill {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    font-size: 12px; color: var(--text2);
+  }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text3);
+    transition: background 0.3s;
+  }
+  .dot.active { background: var(--neon); box-shadow: var(--neon-glow); }
+  .dot.loading { background: var(--amber); animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Main layout */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 700px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Camera card */
+  .cam-card {
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+    border: 1px solid var(--border);
+    position: relative;
+    aspect-ratio: 4/3;
+  }
+  .cam-card.active { border-color: var(--border-neon); }
+  #videoEl {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    display: block;
+  }
+  #canvasEl {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    transform: scaleX(-1);
+    pointer-events: none;
+  }
+  .cam-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--bg2);
+    transition: opacity 0.4s;
+  }
+  .cam-overlay.hidden { opacity: 0; pointer-events: none; }
+  .cam-overlay-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
+  .cam-overlay-text { font-size: 14px; color: var(--text2); }
+
+  /* Top badge on cam */
+  .cam-badge {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 12px; color: #fff;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+    transition: border-color 0.3s;
+  }
+  .cam-badge.hand { border-color: var(--border-neon); color: var(--neon); }
+
+  /* Corner indicators */
+  .corner { position: absolute; width: 20px; height: 20px; opacity: 0.4; }
+  .corner.tl { top: 8px; left: 8px; border-top: 2px solid var(--neon); border-left: 2px solid var(--neon); }
+  .corner.tr { top: 8px; right: 8px; border-top: 2px solid var(--neon); border-right: 2px solid var(--neon); }
+  .corner.bl { bottom: 8px; left: 8px; border-bottom: 2px solid var(--neon); border-left: 2px solid var(--neon); }
+  .corner.br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--neon); border-right: 2px solid var(--neon); }
+
+  /* Right panel */
+  .panel { display: flex; flex-direction: column; gap: 12px; }
+
+  /* Big letter display */
+  .letter-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .letter-card.detected { border-color: var(--border-neon); }
+  .letter-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center top, rgba(0,255,136,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .letter-label { font-size: 11px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; }
+  .letter-big {
+    font-size: 72px; font-weight: 700; line-height: 1;
+    color: var(--neon);
+    text-shadow: var(--neon-glow);
+    min-height: 72px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .letter-big.dim { color: var(--text3); text-shadow: none; }
+  .letter-desc { font-size: 13px; color: var(--text2); margin-top: 8px; min-height: 18px; }
+
+  /* Confidence bar */
+  .conf-wrap {
+    margin-top: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .conf-label { font-size: 11px; color: var(--text3); width: 28px; text-align: right; }
+  .conf-track {
+    flex: 1; height: 4px; background: rgba(255,255,255,0.07);
+    border-radius: 2px; overflow: hidden;
+  }
+  .conf-fill {
+    height: 100%; border-radius: 2px;
+    background: var(--neon);
+    box-shadow: 0 0 8px rgba(0,255,136,0.4);
+    transition: width 0.2s ease, background 0.2s;
+    width: 0%;
+  }
+
+  /* Sentence card */
+  .sentence-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .sentence-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .sentence-label { font-size: 11px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; }
+  .sentence-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { background: var(--bg3); color: var(--text); border-color: rgba(255,255,255,0.15); }
+  .sentence-text {
+    font-size: 22px; font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--text);
+    min-height: 32px;
+    word-break: break-all;
+  }
+  .sentence-text.empty { font-size: 13px; color: var(--text3); letter-spacing: 0; font-weight: 400; }
+
+  /* Start button */
+  .start-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-neon);
+    background: var(--neon-dim);
+    color: var(--neon);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .start-btn:hover { background: rgba(0,255,136,0.25); box-shadow: var(--neon-glow); }
+  .start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Space btn */
+  .space-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text2);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.15s;
+  }
+  .space-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+  /* Gesture ref */
+  .ref-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .ref-card-label { font-size: 11px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin-bottom: 12px; }
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .ref-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+    background: var(--bg2);
+    cursor: default;
+    transition: border-color 0.2s;
+  }
+  .ref-item:hover { border-color: var(--border-neon); }
+  .ref-item.active-gesture { border-color: var(--neon); background: var(--neon-dim); }
+  .ri-letter { font-size: 18px; font-weight: 700; color: var(--text); }
+  .ri-desc { font-size: 8px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
+
+  /* Tips */
+  .tip {
+    font-size: 11px; color: var(--text3);
+    display: flex; gap: 6px; align-items: flex-start;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    line-height: 1.5;
+  }
+  .tip-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">✋</div>
+      <div>
+        <div class="logo-text">SignDetect</div>
+        <div class="logo-sub">Bahasa Isyarat AI</div>
+      </div>
+    </div>
+    <div class="status-pill">
+      <div class="dot loading" id="statusDot"></div>
+      <span id="statusText">Siap</span>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="main-grid">
+
+    <!-- Camera -->
+    <div>
+      <div class="cam-card" id="camCard">
+        <video id="videoEl" playsinline autoplay muted></video>
+        <canvas id="canvasEl"></canvas>
+
+        <!-- Corners -->
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+
+        <div class="cam-badge" id="camBadge">
+          <span id="camBadgeDot" style="width:6px;height:6px;border-radius:50%;background:#555;display:inline-block;"></span>
+          <span id="camBadgeText">Kamera belum aktif</span>
+        </div>
+
+        <div class="cam-overlay" id="camOverlay">
+          <div class="cam-overlay-icon">📷</div>
+          <div class="cam-overlay-text">Klik tombol untuk mulai</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          Pastikan pencahayaan cukup dan tangan terlihat jelas. Tahan gestur ~1 detik agar terdeteksi.
+        </div>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="panel">
+
+      <!-- Letter display -->
+      <div class="letter-card" id="letterCard">
+        <div class="letter-label">Huruf Terdeteksi</div>
+        <div class="letter-big dim" id="bigLetter">—</div>
+        <div class="letter-desc" id="detWord">Belum ada gerakan</div>
+        <div class="conf-wrap">
+          <div class="conf-label" id="confPct">0%</div>
+          <div class="conf-track">
+            <div class="conf-fill" id="confBar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sentence -->
+      <div class="sentence-card">
+        <div class="sentence-top">
+          <div class="sentence-label">Kalimat</div>
+          <div class="sentence-actions">
+            <button class="icon-btn" id="btnDel" title="Hapus">⌫</button>
+            <button class="icon-btn" id="btnClear" title="Reset">✕</button>
+          </div>
+        </div>
+        <div class="sentence-text empty" id="sentenceBox">Tunjukkan gestur...</div>
+        <button class="space-btn" id="btnSpace" style="margin-top:10px;">⎵ &nbsp; Tambah Spasi</button>
+      </div>
+
+      <!-- Start button -->
+      <button class="start-btn" id="btnCam">
+        <span>▶</span> Mulai Kamera
+      </button>
+
+      <!-- Gesture ref -->
+      <div class="ref-card">
+        <div class="ref-card-label">Gestur Didukung</div>
+        <div class="ref-grid" id="refGrid"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1675466862/drawing_utils.js" crossorigin="anonymous"></script>
+<script>
+const videoEl = document.getElementById('videoEl');
+const canvasEl = document.getElementById('canvasEl');
+const ctx = canvasEl.getContext('2d');
+const bigLetter = document.getElementById('bigLetter');
+const detWord = document.getElementById('detWord');
+const confBar = document.getElementById('confBar');
+const confPct = document.getElementById('confPct');
+const sentenceBox = document.getElementById('sentenceBox');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const camBadge = document.getElementById('camBadge');
+const camBadgeDot = document.getElementById('camBadgeDot');
+const camBadgeText = document.getElementById('camBadgeText');
+const camOverlay = document.getElementById('camOverlay');
+const camCard = document.getElementById('camCard');
+const letterCard = document.getElementById('letterCard');
+
+let sentence = '';
+let lastLetter = '';
+let lastLetterTime = 0;
+let cameraStarted = false;
+let currentGesture = null;
+
+const GESTURES = [
+  { letter: 'A', desc: 'kepalan' },
+  { letter: 'B', desc: '4 jari lurus' },
+  { letter: 'C', desc: 'melengkung' },
+  { letter: 'D', desc: 'idx+ibu jari' },
+  { letter: 'G', desc: 'pistol' },
+  { letter: 'L', desc: 'huruf L' },
+  { letter: 'O', desc: 'cincin' },
+  { letter: 'V', desc: 'dua jari' },
+  { letter: 'W', desc: '3 jari' },
+  { letter: 'Y', desc: 'shaka' },
+  { letter: '👍', desc: 'jempol' },
+  { letter: '🤙', desc: 'hang loose' },
+];
+
+const refGrid = document.getElementById('refGrid');
+const refItems = {};
+GESTURES.forEach(g => {
+  const el = document.createElement('div');
+  el.className = 'ref-item';
+  el.id = 'ref-' + g.letter;
+  el.innerHTML = `<div class="ri-letter">${g.letter}</div><div class="ri-desc">${g.desc}</div>`;
+  refGrid.appendChild(el);
+  refItems[g.letter] = el;
+});
+
+function setActiveGesture(letter) {
+  Object.values(refItems).forEach(el => el.classList.remove('active-gesture'));
+  if (letter && refItems[letter]) refItems[letter].classList.add('active-gesture');
+}
+
+function isExtended(tip, pip, wrist) {
+  return tip.y < pip.y && tip.y < wrist.y;
+}
+function dist2D(a, b) {
+  return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
+}
+function classifyHand(lm) {
+  const wrist = lm[0];
+  const thumbTip = lm[4], thumbMCP = lm[2];
+  const indexTip = lm[8], indexPIP = lm[6];
+  const middleTip = lm[12], middlePIP = lm[10];
+  const ringTip = lm[16], ringPIP = lm[14];
+  const pinkyTip = lm[20], pinkyPIP = lm[18];
+  const idxExt = isExtended(indexTip, indexPIP, wrist);
+  const midExt = isExtended(middleTip, middlePIP, wrist);
+  const ringExt = isExtended(ringTip, ringPIP, wrist);
+  const pinkyExt = isExtended(pinkyTip, pinkyPIP, wrist);
+  const thumbExt = thumbTip.x < thumbMCP.x;
+  const thumbUp = thumbTip.y < lm[3].y && !idxExt && !midExt && !ringExt && !pinkyExt;
+  const fingersUp = [idxExt, midExt, ringExt, pinkyExt].filter(Boolean).length;
+  const indexThumbClose = dist2D(indexTip, thumbTip) < 0.07;
+  if (thumbUp && thumbTip.y < lm[1].y - 0.08) return { letter: '👍', conf: 90 };
+  if (pinkyExt && thumbExt && !idxExt && !midExt && !ringExt) return { letter: '🤙', conf: 88 };
+  if (idxExt && !midExt && !ringExt && !pinkyExt) {
+    if (thumbExt) return { letter: 'L', conf: 85 };
+    return { letter: 'G', conf: 80 };
+  }
+  if (idxExt && midExt && !ringExt && !pinkyExt) return { letter: 'V', conf: 87 };
+  if (idxExt && midExt && ringExt && !pinkyExt) return { letter: 'W', conf: 85 };
+  if (fingersUp === 4 && !thumbExt) return { letter: 'B', conf: 82 };
+  if (fingersUp === 0 && !thumbExt) return { letter: 'A', conf: 80 };
+  if (indexThumbClose && fingersUp <= 1) return { letter: 'O', conf: 78 };
+  if (thumbExt && !idxExt && !midExt && !ringExt && pinkyExt) return { letter: 'Y', conf: 84 };
+  if (fingersUp >= 3) return { letter: 'C', conf: 60 };
+  return { letter: 'D', conf: 50 };
+}
+
+// Custom neon skeleton drawing
+function drawHandSkeleton(lm) {
+  const W = canvasEl.width, H = canvasEl.height;
+  const toXY = p => [p.x * W, p.y * H];
+
+  const connections = [
+    // Thumb
+    [0,1],[1,2],[2,3],[3,4],
+    // Index
+    [0,5],[5,6],[6,7],[7,8],
+    // Middle
+    [0,9],[9,10],[10,11],[11,12],
+    // Ring
+    [0,13],[13,14],[14,15],[15,16],
+    // Pinky
+    [0,17],[17,18],[18,19],[19,20],
+    // Palm
+    [5,9],[9,13],[13,17]
+  ];
+
+  ctx.save();
+  // Draw connections with neon glow
+  connections.forEach(([a, b]) => {
+    const [ax, ay] = toXY(lm[a]);
+    const [bx, by] = toXY(lm[b]);
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.strokeStyle = 'rgba(0,255,136,0.5)';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = '#00ff88';
+    ctx.shadowBlur = 8;
+    ctx.stroke();
+    // Bright core line
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.strokeStyle = 'rgba(0,255,136,1)';
+    ctx.lineWidth = 1;
+    ctx.shadowBlur = 0;
+    ctx.stroke();
+  });
+
+  // Draw landmark dots
+  lm.forEach((p, i) => {
+    const [x, y] = toXY(p);
+    const isTip = [4,8,12,16,20].includes(i);
+    const isWrist = i === 0;
+    ctx.beginPath();
+    ctx.arc(x, y, isTip ? 5 : isWrist ? 6 : 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = isTip ? '#fff' : '#00ff88';
+    ctx.shadowColor = '#00ff88';
+    ctx.shadowBlur = isTip ? 12 : 6;
+    ctx.fill();
+    if (isTip) {
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 1.5;
+      ctx.shadowBlur = 0;
+      ctx.stroke();
+    }
+  });
+
+  ctx.restore();
+}
+
+function showResult(letter, conf) {
+  bigLetter.textContent = letter;
+  bigLetter.classList.remove('dim');
+  detWord.textContent = conf > 70 ? `Terdeteksi dengan baik` : `Sinyal lemah`;
+  confBar.style.width = conf + '%';
+  confPct.textContent = Math.round(conf) + '%';
+  confBar.style.background = conf > 75 ? '#00ff88' : conf > 55 ? '#ffb800' : '#ff4466';
+  letterCard.classList.add('detected');
+  setActiveGesture(letter);
+
+  const now = Date.now();
+  if (letter !== lastLetter || now - lastLetterTime > 2000) {
+    if (conf > 70 && now - lastLetterTime > 900) {
+      if (!['👍','🤙'].includes(letter)) {
+        sentence += letter;
+        updateSentence();
+      }
+      lastLetter = letter;
+      lastLetterTime = now;
+    }
+  }
+}
+
+function showNoHand() {
+  bigLetter.textContent = '—';
+  bigLetter.classList.add('dim');
+  detWord.textContent = 'Arahkan tangan ke kamera';
+  confBar.style.width = '0%';
+  confPct.textContent = '0%';
+  letterCard.classList.remove('detected');
+  setActiveGesture(null);
+}
+
+function updateSentence() {
+  if (sentence) {
+    sentenceBox.className = 'sentence-text';
+    sentenceBox.textContent = sentence;
+  } else {
+    sentenceBox.className = 'sentence-text empty';
+    sentenceBox.textContent = 'Tunjukkan gestur...';
+  }
+}
+
+document.getElementById('btnSpace').onclick = () => { sentence += ' '; updateSentence(); };
+document.getElementById('btnDel').onclick = () => { sentence = sentence.slice(0,-1); updateSentence(); };
+document.getElementById('btnClear').onclick = () => { sentence = ''; updateSentence(); };
+
+document.getElementById('btnCam').onclick = async () => {
+  if (cameraStarted) return;
+  cameraStarted = true;
+  const btn = document.getElementById('btnCam');
+  btn.disabled = true;
+  btn.textContent = '⏳  Memuat...';
+  statusDot.className = 'dot loading';
+  statusText.textContent = 'Memuat AI...';
+
+  const hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${f}` });
+  hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
+  hands.onResults(results => {
+    canvasEl.width = videoEl.videoWidth || 640;
+    canvasEl.height = videoEl.videoHeight || 480;
+    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      const lm = results.multiHandLandmarks[0];
+      drawHandSkeleton(lm);
+      const res = classifyHand(lm);
+      showResult(res.letter, res.conf);
+      camBadge.className = 'cam-badge hand';
+      camBadgeDot.style.background = '#00ff88';
+      camBadgeDot.style.boxShadow = '0 0 6px #00ff88';
+      camBadgeText.textContent = '✋ Tangan terdeteksi';
+    } else {
+      showNoHand();
+      camBadge.className = 'cam-badge';
+      camBadgeDot.style.background = '#555';
+      camBadgeDot.style.boxShadow = 'none';
+      camBadgeText.textContent = 'Mencari tangan...';
+    }
+  });
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: 640, height: 480 }
+    });
+    videoEl.srcObject = stream;
+    await new Promise(r => videoEl.onloadedmetadata = r);
+    videoEl.play();
+    camOverlay.classList.add('hidden');
+    camCard.classList.add('active');
+    statusDot.className = 'dot active';
+    statusText.textContent = 'Live';
+    btn.textContent = '● Kamera Aktif';
+
+    const camera = new Camera(videoEl, {
+      onFrame: async () => { await hands.send({ image: videoEl }); },
+      width: 640, height: 480
+    });
+    camera.start();
+  } catch(e) {
+    cameraStarted = false;
+    btn.disabled = false;
+    btn.innerHTML = '<span>▶</span> Mulai Kamera';
+    statusDot.className = 'dot';
+    statusText.textContent = 'Error kamera';
+    camBadgeText.textContent = 'Akses kamera ditolak';
+  }
+};
+</script>
+</body>
+</html>
+HTMLEOF
+echo "Done"
