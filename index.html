@@ -6,7 +6,6 @@
 <title>Deteksi Bahasa Isyarat</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
     --neon: #00ff88;
     --neon-dim: rgba(0,255,136,0.15);
@@ -25,7 +24,6 @@
     --radius: 16px;
     --radius-sm: 10px;
   }
-
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background: var(--bg);
@@ -33,7 +31,6 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-
   body::before {
     content: '';
     position: fixed;
@@ -45,273 +42,77 @@
     pointer-events: none;
     z-index: 0;
   }
-
-  .container {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 24px 16px 48px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .logo-icon {
-    width: 38px; height: 38px;
-    border-radius: 10px;
-    background: var(--neon-dim);
-    border: 1px solid var(--border-neon);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-  }
+  .container { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; position: relative; z-index: 1; }
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--neon-dim); border: 1px solid var(--border-neon); display: flex; align-items: center; justify-content: center; font-size: 20px; }
   .logo-text { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
   .logo-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
-  .status-pill {
-    display: flex; align-items: center; gap: 7px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--bg2);
-    font-size: 12px; color: var(--text2);
-  }
-  .dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--text3);
-    transition: background 0.3s;
-  }
+  .status-pill { display: flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg2); font-size: 12px; color: var(--text2); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); transition: background 0.3s; }
   .dot.active { background: var(--neon); box-shadow: var(--neon-glow); }
   .dot.loading { background: var(--amber); animation: blink 1s infinite; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  .main-grid {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 16px;
-    align-items: start;
-  }
-  @media (max-width: 700px) {
-    .main-grid { grid-template-columns: 1fr; }
-  }
-
-  .cam-card {
-    border-radius: var(--radius);
-    overflow: hidden;
-    background: #000;
-    border: 1px solid var(--border);
-    position: relative;
-    aspect-ratio: 4/3;
-  }
+  .main-grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
+  @media (max-width: 700px) { .main-grid { grid-template-columns: 1fr; } }
+  .cam-card { border-radius: var(--radius); overflow: hidden; background: #000; border: 1px solid var(--border); position: relative; aspect-ratio: 4/3; }
   .cam-card.active { border-color: var(--border-neon); }
-  #videoEl {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1);
-    display: block;
-  }
-  #canvasEl {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    transform: scaleX(-1);
-    pointer-events: none;
-  }
-  .cam-overlay {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    background: var(--bg2);
-    transition: opacity 0.4s;
-  }
+  #videoEl { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+  #canvasEl { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); pointer-events: none; }
+  .cam-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg2); transition: opacity 0.4s; }
   .cam-overlay.hidden { opacity: 0; pointer-events: none; }
   .cam-overlay-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
   .cam-overlay-text { font-size: 14px; color: var(--text2); }
-
-  .cam-badge {
-    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 5px 14px;
-    font-size: 12px; color: #fff;
-    white-space: nowrap;
-    display: flex; align-items: center; gap: 6px;
-    transition: border-color 0.3s;
-  }
+  .cam-badge { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: 999px; padding: 5px 14px; font-size: 12px; color: #fff; white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: border-color 0.3s; }
   .cam-badge.hand { border-color: var(--border-neon); color: var(--neon); }
-
   .corner { position: absolute; width: 20px; height: 20px; opacity: 0.4; }
   .corner.tl { top: 8px; left: 8px; border-top: 2px solid var(--neon); border-left: 2px solid var(--neon); }
   .corner.tr { top: 8px; right: 8px; border-top: 2px solid var(--neon); border-right: 2px solid var(--neon); }
   .corner.bl { bottom: 8px; left: 8px; border-bottom: 2px solid var(--neon); border-left: 2px solid var(--neon); }
   .corner.br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--neon); border-right: 2px solid var(--neon); }
-
   .panel { display: flex; flex-direction: column; gap: 12px; }
-
-  .letter-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.3s;
-  }
+  .letter-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; position: relative; overflow: hidden; transition: border-color 0.3s; }
   .letter-card.detected { border-color: var(--border-neon); }
-  .letter-card::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse at center top, rgba(0,255,136,0.06) 0%, transparent 60%);
-    pointer-events: none;
-  }
+  .letter-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center top, rgba(0,255,136,0.06) 0%, transparent 60%); pointer-events: none; }
   .letter-label { font-size: 11px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; }
-  .letter-big {
-    font-size: 72px; font-weight: 700; line-height: 1;
-    color: var(--neon);
-    text-shadow: var(--neon-glow);
-    min-height: 72px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s;
-  }
-  .letter-big.dim { color: var(--text3); text-shadow: none; }
+  .letter-big { font-size: 40px; font-weight: 700; line-height: 1.2; color: var(--neon); text-shadow: var(--neon-glow); min-height: 48px; display: flex; align-items: center; justify-content: center; text-align: center; transition: all 0.15s; word-break: keep-all; }
+  .letter-big.dim { color: var(--text3); text-shadow: none; font-size: 28px; }
   .letter-desc { font-size: 13px; color: var(--text2); margin-top: 8px; min-height: 18px; }
-
-  .conf-wrap {
-    margin-top: 14px;
-    display: flex; align-items: center; gap: 10px;
-  }
+  .conf-wrap { margin-top: 14px; display: flex; align-items: center; gap: 10px; }
   .conf-label { font-size: 11px; color: var(--text3); width: 28px; text-align: right; }
-  .conf-track {
-    flex: 1; height: 4px; background: rgba(255,255,255,0.07);
-    border-radius: 2px; overflow: hidden;
-  }
-  .conf-fill {
-    height: 100%; border-radius: 2px;
-    background: var(--neon);
-    box-shadow: 0 0 8px rgba(0,255,136,0.4);
-    transition: width 0.2s ease, background 0.2s;
-    width: 0%;
-  }
-
-  .sentence-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-  }
-  .sentence-top {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 10px;
-  }
+  .conf-track { flex: 1; height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+  .conf-fill { height: 100%; border-radius: 2px; background: var(--neon); box-shadow: 0 0 8px rgba(0,255,136,0.4); transition: width 0.2s ease, background 0.2s; width: 0%; }
+  .sentence-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .sentence-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .sentence-label { font-size: 11px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; }
   .sentence-actions { display: flex; gap: 6px; }
-  .icon-btn {
-    width: 28px; height: 28px;
-    border-radius: 7px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text2);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    transition: all 0.15s;
-  }
+  .icon-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; }
   .icon-btn:hover { background: var(--bg3); color: var(--text); border-color: rgba(255,255,255,0.15); }
-  .sentence-text {
-    font-size: 22px; font-weight: 600;
-    letter-spacing: 3px;
-    color: var(--text);
-    min-height: 32px;
-    word-break: break-all;
-  }
+  .sentence-text { font-size: 18px; font-weight: 600; letter-spacing: 0.3px; color: var(--text); min-height: 32px; word-break: break-word; line-height: 1.5; }
   .sentence-text.empty { font-size: 13px; color: var(--text3); letter-spacing: 0; font-weight: 400; }
-
-  .start-btn {
-    width: 100%;
-    padding: 14px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-neon);
-    background: var(--neon-dim);
-    color: var(--neon);
-    font-size: 14px; font-weight: 600;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: all 0.2s;
-    letter-spacing: 0.3px;
-  }
+  .start-btn { width: 100%; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-neon); background: var(--neon-dim); color: var(--neon); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; letter-spacing: 0.3px; }
   .start-btn:hover { background: rgba(0,255,136,0.25); box-shadow: var(--neon-glow); }
   .start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .space-btn {
-    width: 100%;
-    padding: 10px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--bg3);
-    color: var(--text2);
-    font-size: 13px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all 0.15s;
-  }
-  .space-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
-
-  .ref-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-  }
+  .ref-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
   .ref-card-label { font-size: 11px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin-bottom: 12px; }
-  .ref-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-  }
-  .ref-item {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 4px;
-    text-align: center;
-    background: var(--bg2);
-    cursor: default;
-    transition: border-color 0.2s;
-  }
+  .ref-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .ref-item { border: 1px solid var(--border); border-radius: 8px; padding: 8px 6px; text-align: center; background: var(--bg2); cursor: default; transition: border-color 0.2s; }
   .ref-item:hover { border-color: var(--border-neon); }
   .ref-item.active-gesture { border-color: var(--neon); background: var(--neon-dim); }
-  .ri-letter { font-size: 18px; font-weight: 700; color: var(--text); }
-  .ri-desc { font-size: 8px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
-
-  .tip {
-    font-size: 11px; color: var(--text3);
-    display: flex; gap: 6px; align-items: flex-start;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--bg2);
-    line-height: 1.5;
-  }
+  .ri-letter { font-size: 13px; font-weight: 700; color: var(--text); }
+  .ri-desc { font-size: 9px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
+  .tip { font-size: 11px; color: var(--text3); display: flex; gap: 6px; align-items: flex-start; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg2); line-height: 1.5; }
   .tip-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
 </style>
 </head>
 <body>
 <div class="container">
-
   <div class="header">
     <div class="logo">
       <div class="logo-icon">✋</div>
       <div>
         <div class="logo-text">SignDetect</div>
-        <div class="logo-sub">Bahasa Isyarat AI</div>
+        <div class="logo-sub">Gestur ke Kalimat</div>
       </div>
     </div>
     <div class="status-pill">
@@ -321,47 +122,39 @@
   </div>
 
   <div class="main-grid">
-
     <div>
       <div class="cam-card" id="camCard">
         <video id="videoEl" playsinline autoplay muted></video>
         <canvas id="canvasEl"></canvas>
-
         <div class="corner tl"></div>
         <div class="corner tr"></div>
         <div class="corner bl"></div>
         <div class="corner br"></div>
-
         <div class="cam-badge" id="camBadge">
           <span id="camBadgeDot" style="width:6px;height:6px;border-radius:50%;background:#555;display:inline-block;"></span>
           <span id="camBadgeText">Kamera belum aktif</span>
         </div>
-
         <div class="cam-overlay" id="camOverlay">
           <div class="cam-overlay-icon">📷</div>
           <div class="cam-overlay-text">Klik tombol untuk mulai</div>
         </div>
       </div>
-
       <div style="margin-top:10px;">
         <div class="tip">
           <span class="tip-icon">💡</span>
-          Pastikan pencahayaan cukup dan tangan terlihat jelas. Tahan gestur ~0.7 detik agar terdeteksi.
+          Pastikan pencahayaan cukup dan tangan terlihat jelas. Tahan gestur ~0.8 detik agar terdeteksi sebagai kata.
         </div>
       </div>
     </div>
 
     <div class="panel">
-
       <div class="letter-card" id="letterCard">
-        <div class="letter-label">Huruf Terdeteksi</div>
+        <div class="letter-label">Kata Terdeteksi</div>
         <div class="letter-big dim" id="bigLetter">—</div>
         <div class="letter-desc" id="detWord">Belum ada gerakan</div>
         <div class="conf-wrap">
           <div class="conf-label" id="confPct">0%</div>
-          <div class="conf-track">
-            <div class="conf-fill" id="confBar"></div>
-          </div>
+          <div class="conf-track"><div class="conf-fill" id="confBar"></div></div>
         </div>
       </div>
 
@@ -369,23 +162,19 @@
         <div class="sentence-top">
           <div class="sentence-label">Kalimat</div>
           <div class="sentence-actions">
-            <button class="icon-btn" id="btnDel" title="Hapus">⌫</button>
+            <button class="icon-btn" id="btnDel" title="Hapus kata terakhir">⌫</button>
             <button class="icon-btn" id="btnClear" title="Reset">✕</button>
           </div>
         </div>
         <div class="sentence-text empty" id="sentenceBox">Tunjukkan gestur...</div>
-        <button class="space-btn" id="btnSpace" style="margin-top:10px;">⎵ &nbsp; Tambah Spasi</button>
       </div>
 
-      <button class="start-btn" id="btnCam">
-        <span>▶</span> Mulai Kamera
-      </button>
+      <button class="start-btn" id="btnCam"><span>▶</span> Mulai Kamera</button>
 
       <div class="ref-card">
         <div class="ref-card-label">Gestur Didukung</div>
         <div class="ref-grid" id="refGrid"></div>
       </div>
-
     </div>
   </div>
 </div>
@@ -410,29 +199,26 @@ const camOverlay = document.getElementById('camOverlay');
 const camCard = document.getElementById('camCard');
 const letterCard = document.getElementById('letterCard');
 
-let sentence = '';
-let lastCommittedLetter = '';
+let sentenceWords = [];
+let lastCommittedGesture = '';
 let lastCommitTime = 0;
 let cameraStarted = false;
 
-// Buffer for temporal smoothing - need same gesture for several frames
 let gestureBuffer = [];
-const BUFFER_SIZE = 6;
-const HOLD_TIME = 700; // ms gesture must be stable before being typed
+const HOLD_TIME = 800;
 
 const GESTURES = [
-  { letter: 'A', desc: 'kepalan' },
-  { letter: 'B', desc: '4 jari lurus' },
-  { letter: 'C', desc: 'melengkung' },
-  { letter: 'D', desc: 'idx+ibu jari' },
-  { letter: 'G', desc: 'pistol' },
-  { letter: 'L', desc: 'huruf L' },
-  { letter: 'O', desc: 'cincin' },
-  { letter: 'V', desc: 'dua jari' },
-  { letter: 'W', desc: '3 jari' },
-  { letter: 'Y', desc: 'shaka' },
-  { letter: '👍', desc: 'jempol' },
-  { letter: '🤙', desc: 'hang loose' },
+  { id: 'fist',     word: 'Halo',          desc: 'Kepalan tangan' },
+  { id: 'open',     word: 'Sampai jumpa',  desc: 'Telapak terbuka' },
+  { id: 'thumbsup', word: 'Ya / Baik',     desc: 'Jempol ke atas' },
+  { id: 'thumbsdown', word: 'Tidak',       desc: 'Jempol ke bawah' },
+  { id: 'point',    word: 'Kamu',          desc: 'Telunjuk menunjuk' },
+  { id: 'peace',    word: 'Damai',         desc: 'Dua jari (V)' },
+  { id: 'three',    word: 'Tolong',        desc: 'Tiga jari' },
+  { id: 'ok',       word: 'Mengerti',      desc: 'Jari membentuk O' },
+  { id: 'rock',     word: 'Terima kasih',  desc: 'Telunjuk + kelingking' },
+  { id: 'love',     word: 'Aku sayang kamu', desc: 'Jempol+telunjuk+kelingking' },
+  { id: 'callme',   word: 'Hubungi aku',   desc: 'Jempol + kelingking (telepon)' },
 ];
 
 const refGrid = document.getElementById('refGrid');
@@ -440,23 +226,21 @@ const refItems = {};
 GESTURES.forEach(g => {
   const el = document.createElement('div');
   el.className = 'ref-item';
-  el.id = 'ref-' + g.letter;
-  el.innerHTML = `<div class="ri-letter">${g.letter}</div><div class="ri-desc">${g.desc}</div>`;
+  el.id = 'ref-' + g.id;
+  el.innerHTML = `<div class="ri-letter">${g.word}</div><div class="ri-desc">${g.desc}</div>`;
   refGrid.appendChild(el);
-  refItems[g.letter] = el;
+  refItems[g.id] = el;
 });
-
-function setActiveGesture(letter) {
+function gestureWord(id) {
+  const g = GESTURES.find(x => x.id === id);
+  return g ? g.word : id;
+}
+function setActiveGesture(id) {
   Object.values(refItems).forEach(el => el.classList.remove('active-gesture'));
-  if (letter && refItems[letter]) refItems[letter].classList.add('active-gesture');
+  if (id && refItems[id]) refItems[id].classList.add('active-gesture');
 }
 
-// ---------- Geometry helpers ----------
-function dist(a, b) {
-  return Math.hypot(a.x - b.x, a.y - b.y, (a.z||0) - (b.z||0));
-}
-
-// Angle (in degrees) at point b, formed by a-b-c
+function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y, (a.z||0) - (b.z||0)); }
 function angle(a, b, c) {
   const v1 = { x: a.x - b.x, y: a.y - b.y };
   const v2 = { x: c.x - b.x, y: c.y - b.y };
@@ -464,98 +248,49 @@ function angle(a, b, c) {
   const m1 = Math.hypot(v1.x, v1.y);
   const m2 = Math.hypot(v2.x, v2.y);
   if (m1 === 0 || m2 === 0) return 0;
-  const cos = Math.max(-1, Math.min(1, dot / (m1 * m2)));
-  return Math.acos(cos) * (180 / Math.PI);
+  const cosA = Math.max(-1, Math.min(1, dot / (m1 * m2)));
+  return Math.acos(cosA) * (180 / Math.PI);
 }
+function fingerCurl(lm, mcp, pip, tip) { return angle(lm[mcp], lm[pip], lm[tip]); }
 
-// Returns true if a finger is "curled" (bent), based on the angle at its PIP joint.
-// Straight finger -> angle near 180. Curled finger -> angle drops well below 160.
-function fingerCurl(lm, mcp, pip, tip) {
-  return angle(lm[mcp], lm[pip], lm[tip]);
-}
-
-// Robust hand classifier using joint angles + relative distances
 function classifyHand(lm) {
   const wrist = lm[0];
-
-  // Curl angle per finger (lower = more curled/closed)
   const thumbAngle  = fingerCurl(lm, 2, 3, 4);
   const indexAngle  = fingerCurl(lm, 5, 6, 8);
   const middleAngle = fingerCurl(lm, 9, 10, 12);
   const ringAngle   = fingerCurl(lm, 13, 14, 16);
   const pinkyAngle  = fingerCurl(lm, 17, 18, 20);
 
-  // Extension flags - tuned thresholds, more tolerant than tip/pip.y comparisons
   const idxExt    = indexAngle  > 145;
   const midExt    = middleAngle > 145;
   const ringExt   = ringAngle   > 145;
   const pinkyExt  = pinkyAngle  > 145;
 
-  // Thumb extension based on distance from palm (handles both rotations)
-  const palmWidth = dist(lm[5], lm[17]); // reference scale
+  const palmWidth = dist(lm[5], lm[17]);
   const thumbSpread = dist(lm[4], lm[5]) / palmWidth;
   const thumbExt = thumbSpread > 0.55 && thumbAngle > 130;
 
   const fingersExtCount = [idxExt, midExt, ringExt, pinkyExt].filter(Boolean).length;
   const indexThumbDist = dist(lm[8], lm[4]) / palmWidth;
 
-  // Thumbs up: thumb extended upward, all other fingers curled, thumb tip clearly above wrist
   const thumbPointsUp = lm[4].y < wrist.y - 0.08;
-  if (fingersExtCount === 0 && thumbExt && thumbPointsUp) {
-    return { letter: '👍', conf: 92 };
-  }
+  const thumbPointsDown = lm[4].y > wrist.y + 0.08;
 
-  // Hang loose: thumb + pinky extended, others curled
-  if (thumbExt && pinkyExt && !idxExt && !midExt && !ringExt) {
-    return { letter: '🤙', conf: 88 };
-  }
+  if (fingersExtCount === 0 && thumbExt && thumbPointsUp) return { id: 'thumbsup', conf: 92 };
+  if (fingersExtCount === 0 && thumbExt && thumbPointsDown) return { id: 'thumbsdown', conf: 90 };
+  if (thumbExt && pinkyExt && !idxExt && !midExt && !ringExt) return { id: 'callme', conf: 86 };
+  if (thumbExt && idxExt && pinkyExt && !midExt && !ringExt) return { id: 'love', conf: 85 };
+  if (idxExt && pinkyExt && !midExt && !ringExt && !thumbExt) return { id: 'rock', conf: 84 };
+  if (indexThumbDist < 0.35 && !midExt && !ringExt && !pinkyExt) return { id: 'ok', conf: 80 };
+  if (idxExt && !midExt && !ringExt && !pinkyExt && !thumbExt) return { id: 'point', conf: 82 };
+  if (idxExt && midExt && !ringExt && !pinkyExt) return { id: 'peace', conf: 87 };
+  if (idxExt && midExt && ringExt && !pinkyExt) return { id: 'three', conf: 85 };
+  if (fingersExtCount === 4) return { id: 'open', conf: 85 };
+  if (fingersExtCount === 0 && !thumbExt) return { id: 'fist', conf: 84 };
 
-  // O: index and thumb tips touching, forming ring, other fingers can be curled or relaxed
-  if (indexThumbDist < 0.35 && !midExt && !ringExt && !pinkyExt) {
-    return { letter: 'O', conf: 80 };
-  }
-
-  // One finger (index) extended
-  if (idxExt && !midExt && !ringExt && !pinkyExt) {
-    return thumbExt ? { letter: 'L', conf: 86 } : { letter: 'G', conf: 82 };
-  }
-
-  // Two fingers (index + middle) extended -> V
-  if (idxExt && midExt && !ringExt && !pinkyExt) {
-    return { letter: 'V', conf: 88 };
-  }
-
-  // Three fingers (index, middle, ring) extended -> W
-  if (idxExt && midExt && ringExt && !pinkyExt) {
-    return { letter: 'W', conf: 86 };
-  }
-
-  // Y: thumb + pinky extended, index/middle/ring curled (without requiring strict pinky check above)
-  if (thumbExt && pinkyExt && !idxExt && !midExt) {
-    return { letter: 'Y', conf: 84 };
-  }
-
-  // All four fingers extended, thumb tucked -> B
-  if (fingersExtCount === 4 && !thumbExt) {
-    return { letter: 'B', conf: 85 };
-  }
-
-  // All fingers curled, thumb tucked -> A (fist)
-  if (fingersExtCount === 0 && !thumbExt) {
-    return { letter: 'A', conf: 84 };
-  }
-
-  // Curved hand, fingers partially bent -> C
-  const avgCurl = (indexAngle + middleAngle + ringAngle + pinkyAngle) / 4;
-  if (avgCurl > 90 && avgCurl < 145 && fingersExtCount <= 2) {
-    return { letter: 'C', conf: 65 };
-  }
-
-  // Fallback - lower confidence catch-all
-  return { letter: 'D', conf: 45 };
+  return { id: null, conf: 0 };
 }
 
-// ---------- Skeleton drawing (smoother / more natural) ----------
 const HAND_CONNECTIONS = [
   [0,1],[1,2],[2,3],[3,4],
   [0,5],[5,6],[6,7],[7,8],
@@ -568,10 +303,7 @@ const HAND_CONNECTIONS = [
 function drawHandSkeleton(lm) {
   const W = canvasEl.width, H = canvasEl.height;
   const toXY = p => [p.x * W, p.y * H];
-
   ctx.save();
-
-  // Soft glow pass (drawn first, blurred, low opacity)
   ctx.shadowColor = 'rgba(0,255,136,0.9)';
   ctx.shadowBlur = 10;
   ctx.lineCap = 'round';
@@ -580,64 +312,45 @@ function drawHandSkeleton(lm) {
   HAND_CONNECTIONS.forEach(([a, b]) => {
     const [ax, ay] = toXY(lm[a]);
     const [bx, by] = toXY(lm[b]);
-    ctx.beginPath();
-    ctx.moveTo(ax, ay);
-    ctx.lineTo(bx, by);
-    ctx.strokeStyle = 'rgba(0,255,136,0.35)';
-    ctx.lineWidth = 4;
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
+    ctx.strokeStyle = 'rgba(0,255,136,0.35)'; ctx.lineWidth = 4; ctx.stroke();
   });
 
-  // Crisp core lines, no shadow (drawn on top for clarity)
   ctx.shadowBlur = 0;
   HAND_CONNECTIONS.forEach(([a, b]) => {
     const [ax, ay] = toXY(lm[a]);
     const [bx, by] = toXY(lm[b]);
-    ctx.beginPath();
-    ctx.moveTo(ax, ay);
-    ctx.lineTo(bx, by);
-    ctx.strokeStyle = 'rgba(170,255,210,0.9)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
+    ctx.strokeStyle = 'rgba(170,255,210,0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
   });
 
-  // Joints
   lm.forEach((p, i) => {
     const [x, y] = toXY(p);
     const isTip = [4,8,12,16,20].includes(i);
     const isWrist = i === 0;
     const r = isTip ? 5 : isWrist ? 6 : 3;
-
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.shadowColor = '#00ff88';
-    ctx.shadowBlur = isTip ? 8 : 4;
-    ctx.fillStyle = isTip ? '#ffffff' : '#00ff88';
-    ctx.fill();
-
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.shadowColor = '#00ff88'; ctx.shadowBlur = isTip ? 8 : 4;
+    ctx.fillStyle = isTip ? '#ffffff' : '#00ff88'; ctx.fill();
     if (isTip) {
       ctx.shadowBlur = 0;
-      ctx.beginPath();
-      ctx.arc(x, y, r + 2, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(0,255,136,0.6)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, r + 2, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0,255,136,0.6)'; ctx.lineWidth = 1; ctx.stroke();
     }
   });
-
   ctx.restore();
 }
 
-// ---------- UI updates ----------
-function showResult(letter, conf, stableProgress) {
-  bigLetter.textContent = letter;
+function showResult(gestureId, conf) {
+  const word = gestureWord(gestureId);
+  bigLetter.textContent = word;
   bigLetter.classList.remove('dim');
   detWord.textContent = conf > 70 ? `Terdeteksi dengan baik` : `Sinyal lemah, tahan posisi`;
   confBar.style.width = conf + '%';
   confPct.textContent = Math.round(conf) + '%';
   confBar.style.background = conf > 75 ? '#00ff88' : conf > 55 ? '#ffb800' : '#ff4466';
   letterCard.classList.add('detected');
-  setActiveGesture(letter);
+  setActiveGesture(gestureId);
 }
 
 function showNoHand() {
@@ -652,52 +365,51 @@ function showNoHand() {
 }
 
 function updateSentence() {
-  if (sentence) {
+  if (sentenceWords.length) {
     sentenceBox.className = 'sentence-text';
-    sentenceBox.textContent = sentence;
+    sentenceBox.textContent = sentenceWords.join(' ');
   } else {
     sentenceBox.className = 'sentence-text empty';
     sentenceBox.textContent = 'Tunjukkan gestur...';
   }
 }
 
-document.getElementById('btnSpace').onclick = () => { sentence += ' '; updateSentence(); };
-document.getElementById('btnDel').onclick = () => { sentence = sentence.slice(0,-1); updateSentence(); };
-document.getElementById('btnClear').onclick = () => { sentence = ''; updateSentence(); };
+document.getElementById('btnDel').onclick = () => { sentenceWords.pop(); updateSentence(); };
+document.getElementById('btnClear').onclick = () => { sentenceWords = []; updateSentence(); };
 
-// ---------- Temporal smoothing / typing logic ----------
-function processGesture(letter, conf) {
+function processGesture(gestureId, conf) {
+  if (!gestureId) {
+    showNoHand();
+    detWord.textContent = 'Gestur tidak dikenali';
+    return;
+  }
+
   const now = Date.now();
-  gestureBuffer.push({ letter, conf, t: now });
-  // keep only recent entries
+  gestureBuffer.push({ id: gestureId, conf, t: now });
   gestureBuffer = gestureBuffer.filter(g => now - g.t <= HOLD_TIME + 200);
 
-  // majority vote over the buffer window
   const counts = {};
-  gestureBuffer.forEach(g => { counts[g.letter] = (counts[g.letter] || 0) + 1; });
-  let dominant = letter, maxCount = 0;
+  gestureBuffer.forEach(g => { counts[g.id] = (counts[g.id] || 0) + 1; });
+  let dominant = gestureId, maxCount = 0;
   Object.entries(counts).forEach(([k, v]) => { if (v > maxCount) { maxCount = v; dominant = k; } });
 
-  const oldestForDominant = gestureBuffer.find(g => g.letter === dominant);
+  const oldestForDominant = gestureBuffer.find(g => g.id === dominant);
   const heldDuration = oldestForDominant ? now - oldestForDominant.t : 0;
   const stableRatio = maxCount / gestureBuffer.length;
 
   showResult(dominant, conf);
 
-  // Commit to sentence only if dominant gesture has been stable long enough,
-  // confidence is decent, and it's a new letter (or enough time passed since last commit)
   if (
     conf > 65 &&
     stableRatio > 0.7 &&
     heldDuration >= HOLD_TIME &&
-    !['👍','🤙'].includes(dominant) &&
-    (dominant !== lastCommittedLetter || now - lastCommitTime > 1400)
+    (dominant !== lastCommittedGesture || now - lastCommitTime > 1600)
   ) {
-    sentence += dominant;
+    sentenceWords.push(gestureWord(dominant));
     updateSentence();
-    lastCommittedLetter = dominant;
+    lastCommittedGesture = dominant;
     lastCommitTime = now;
-    gestureBuffer = []; // reset so the same letter requires a fresh hold to repeat
+    gestureBuffer = [];
   }
 }
 
@@ -727,8 +439,7 @@ document.getElementById('btnCam').onclick = async () => {
       const lm = results.multiHandLandmarks[0];
       drawHandSkeleton(lm);
       const res = classifyHand(lm);
-      processGesture(res.letter, res.conf);
-
+      processGesture(res.id, res.conf);
       camBadge.className = 'cam-badge hand';
       camBadgeDot.style.background = '#00ff88';
       camBadgeDot.style.boxShadow = '0 0 6px #00ff88';
